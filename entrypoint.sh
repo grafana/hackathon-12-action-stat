@@ -4,6 +4,11 @@
 echo "Action Stat!"
 echo "Version: $(cat /version)"
 
+echo "${GITHUB_WORKSPACE}"
+ls "${GITHUB_WORKSPACE}"
+git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+cd "${GITHUB_WORKSPACE}"
+
 export LOG_DIRECTORY="/var/logs/action"
 mkdir -p ${LOG_DIRECTORY}
 
