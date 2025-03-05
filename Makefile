@@ -12,6 +12,7 @@ push:
 
 release:
 	git tag -a -m "Release $(VERSION)" $(VERSION)
+	git push origin tag $(VERSION)
 	git tag -f $(MAJOR_VERSION)
-	git push origin tag $(MAJOR_VERSION)
+	git push -f origin tag $(MAJOR_VERSION)
 	gh release create $(VERSION) --generate-notes
