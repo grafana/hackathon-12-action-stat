@@ -9,6 +9,12 @@ branding:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  env:
+    GH_TOKEN: '${{ inputs.github-token }}'
+    TELEMETRY_URL: '${{ inputs.telemetry-url }}'
+    TELEMETRY_USERNAME: '${{ inputs.telemetry-username }}'
+    TELEMETRY_PASSWORD: '${{ inputs.telemetry-password }}'
+    WORKFLOW_RUN_ID: '${{ inputs.workflow-run-id }}'
   
 inputs:
   github-token:

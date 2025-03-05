@@ -5,13 +5,11 @@ echo "Hello, world!"
 export LOG_DIRECTORY="/var/logs/action"
 mkdir -p ${LOG_DIRECTORY}
 
-WORKFLOW_NAME=$(gh run view "${INPUT_WORKFLOW_RUN_ID}" --json workflowName -q .workflowName)
+WORKFLOW_NAME=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowName -q .workflowName)
 GITHUB_REPOSITORY=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 
-echo "Getting logs for workflow run ${INPUT_WORKFLOW_RUN_ID} on ${GITHUB_REPOSITORY} for workflow ${WORKFLOW_NAME}"
+echo "Getting logs for workflow run ${WORKFLOW_RUN_ID} on ${GITHUB_REPOSITORY} for workflow ${WORKFLOW_NAME}"
 
-export GH_TOKEN=${INPUT_GITHUB_TOKEN}
-gh auth login
 gh auth status
 
 # # Run alloy in the background and save its PID
