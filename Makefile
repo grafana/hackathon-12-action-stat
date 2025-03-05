@@ -5,8 +5,14 @@ lint:
 	shellcheck -x entrypoint.sh get-logs.sh
 
 build: Dockerfile entrypoint.sh get-logs.sh
-	docker build -t ghcr.io/grafana/hackathon-12-action-stat:$(VERSION) .
-	docker tag ghcr.io/grafana/hackathon-12-action-stat:$(VERSION) ghcr.io/grafana/hackathon-12-action-stat:$(MAJOR_VERSION)
+	docker build \
+		--platform linux/amd64 \
+		--tag ghcr.io/grafana/hackathon-12-action-stat:$(VERSION) \
+		.
+
+	docker tag \
+		ghcr.io/grafana/hackathon-12-action-stat:$(VERSION) \
+		ghcr.io/grafana/hackathon-12-action-stat:$(MAJOR_VERSION)
 
 push:
 	docker push ghcr.io/grafana/hackathon-12-action-stat:$(VERSION)
