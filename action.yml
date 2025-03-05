@@ -1,14 +1,14 @@
-name: 'Action Stats'
-description: 'Upload GitHub Action telemetry data to an OTLP endpoint'
-author: 'Pete Wall'
+name: Action Stats
+description: Upload GitHub Action telemetry data to an OTLP endpoint
+author: Pete Wall
 
 branding:
-  icon: 'bar-chart'
-  color: 'blue'
+  icon: upload-cloud
+  color: orange
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: docker
+  image: docker://ghcr.io/grafana/hackathon-12-action-stat
   env:
     GH_TOKEN: '${{ inputs.github-token }}'
     TELEMETRY_URL: '${{ inputs.telemetry-url }}'
@@ -18,17 +18,17 @@ runs:
   
 inputs:
   github-token:
-    description: 'GitHub token for API access'
+    description: GitHub token for API access
     required: true
   telemetry-url:
-    description: 'Telemetry URL'
+    description: Telemetry URL
     required: true
   telemetry-username:
-    description: 'Telemetry username'
+    description: Telemetry username
     required: true
   telemetry-password:
-    description: 'Telemetry password'
+    description: Telemetry password
     required: true
   workflow-run-id:
-    description: 'Workflow run ID'
+    description: Workflow run ID
     required: true
