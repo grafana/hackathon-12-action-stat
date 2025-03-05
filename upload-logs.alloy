@@ -1,0 +1,52 @@
+otelcol.receiver.filelog "run_log" {
+  include = ["/var/logs/action/job-*-step-*.log"]
+  start_at = "beginning"
+  delete_after_read = true
+  include_file_name = true
+  include_file_path = false
+  include_file_name_resolved = false
+  include_file_path_resolved = false
+  attributes = {
+    "run.id" = sys.env("RUN_ID"),
+  }
+  resource = {
+    "repository.name" = sys.env("GITHUB_REPOSITORY"),
+    "workflow.name" = sys.env("GITHUB_WORKFLOW"),
+    "service_name" = "github_actions",
+  }
+
+  operators = [
+    {
+      type       = "regex_parser",
+      parse_from = "attributes[\"log.file.name\"]",
+      regex      = "^job-(?P<job_id>[0-9]+)-step-(?P<step_id>[0-9]+)\\.log$",
+    },
+    {
+      type  = "regex_parser",
+      regex = "^(?P<job_name>[^\t]+)\t(?P<step_name>[^\t]+)\t(?P<timestamp_field>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+Z) .*$",
+      timestamp = {
+        parse_from = "body.timestamp_field",
+        layout_type = "strptime",
+        layout = "%Y-%m-%dT%H:%M:%S.%f%z",
+      },
+    },
+  ]
+
+  output {
+    logs = [
+      otelcol.exporter.otlphttp.destination.input,
+    ]
+  }
+}
+
+otelcol.exporter.otlphttp "destination" {
+  client {
+    endpoint = sys.env("INPUT_TELEMETRY_URL")
+    auth = otelcol.auth.basic.grafana_cloud.handler
+  }
+}
+
+otelcol.auth.basic "destination" {
+  username = sys.env("INPUT_TELEMETRY_USERNAME")
+  password = sys.env("INPUT_TELEMETRY_PASSWORD")
+}

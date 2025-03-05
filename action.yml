@@ -1,0 +1,37 @@
+name: 'Action Stats'
+description: 'Upload GitHub Action telemetry data to an OTLP endpoint'
+author: 'Pete Wall'
+
+branding:
+  icon: 'bar-chart'
+  color: 'blue'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+  telemetry-url:
+    description: 'Telemetry URL'
+    required: true
+  telemetry-username:
+    description: 'Telemetry username'
+    required: true
+  telemetry-password:
+    description: 'Telemetry password'
+    required: true
+  workflow-run-id:
+    description: 'Workflow run ID'
+    required: false
+    default: '${{ github.event.workflow_run.id }}'
+  workflow-name:
+    description: 'Workflow name'
+    required: false
+    default: '${{ github.event.workflow.name }}'
+  repository:
+    description: 'Repository name'
+    required: false
+    default: '${{ github.event.repository.full_name }}'
