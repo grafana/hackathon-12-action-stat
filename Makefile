@@ -39,3 +39,18 @@ release:
 
 	git tag -f $(MAJOR_VERSION)
 	git push -f origin tag $(MAJOR_VERSION)
+
+
+run-local:
+ifndef WORKFLOW_RUN_ID
+	$(error WORKFLOW_RUN_ID is not set)
+endif
+	docker run -it \
+		-e GITHUB_WORKSPACE=/github/workspace \
+		-e GH_TOKEN \
+		-e TELEMETRY_URL \
+		-e TELEMETRY_USERNAME \
+		-e TELEMETRY_PASSWORD \
+		-e WORKFLOW_RUN_ID \
+		-v $(shell pwd)/../k8s-monitoring-helm:/github/workspace:ro \
+		ghcr.io/grafana/hackathon-12-action-stat:latest

@@ -1,23 +1,17 @@
 #!/bin/bash
 
+set -euo pipefail
 
 echo "Action Stat!"
 echo "Version: $(cat /version)"
 
-echo "${GITHUB_WORKSPACE}"
-ls "${GITHUB_WORKSPACE}"
 git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 cd "${GITHUB_WORKSPACE}"
 
 export LOG_DIRECTORY="/var/logs/action"
 mkdir -p ${LOG_DIRECTORY}
 
-WORKFLOW_NAME=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowName -q .workflowName)
-GITHUB_REPOSITORY=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-
-echo "Getting logs for workflow run ${WORKFLOW_RUN_ID} on ${GITHUB_REPOSITORY} for workflow ${WORKFLOW_NAME}"
-
-gh auth status
+/etc/bin/get-logs.sh
 
 # # Run alloy in the background and save its PID
 # alloy run /etc/alloy/upload-logs.alloy --stability.level public-preview --disable-reporting &
