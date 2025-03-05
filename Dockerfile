@@ -12,6 +12,7 @@ RUN (type -p wget >/dev/null || (apt update && apt-get install wget -y)) \
 	&& apt install gh -y
 RUN git config --global --add safe.directory /github/workspace
 
+COPY version /version
 COPY upload-logs.alloy /etc/alloy/
 COPY entrypoint.sh get-logs.sh /etc/bin/
 

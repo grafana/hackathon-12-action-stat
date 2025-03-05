@@ -1,6 +1,8 @@
 #!/bin/bash
 
-echo "Hello, world!"
+
+echo "Action Stat!"
+echo "Version: $(cat /version)"
 
 export LOG_DIRECTORY="/var/logs/action"
 mkdir -p ${LOG_DIRECTORY}
