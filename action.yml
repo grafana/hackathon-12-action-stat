@@ -25,13 +25,4 @@ inputs:
     required: true
   workflow-run-id:
     description: 'Workflow run ID'
-    required: false
-    default: '${{ github.event.workflow_run.id }}'
-  workflow-name:
-    description: 'Workflow name'
-    required: false
-    default: '${{ github.event.workflow.name }}'
-  repository:
-    description: 'Repository name'
-    required: false
-    default: '${{ github.event.repository.full_name }}'
+    required: true

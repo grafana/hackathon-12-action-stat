@@ -1,5 +1,7 @@
 FROM grafana/alloy:latest
 
+LABEL org.opencontainers.image.source="https://github.com/grafana/hackathon-12-action-stat"
+
 RUN (type -p wget >/dev/null || (apt update && apt-get install wget -y)) \
 	&& mkdir -p -m 755 /etc/apt/keyrings \
         && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
