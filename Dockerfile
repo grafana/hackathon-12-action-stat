@@ -17,4 +17,6 @@ COPY entrypoint.sh get-logs.sh /etc/bin/
 RUN chmod +x /etc/bin/entrypoint.sh
 RUN chmod +x /etc/bin/get-logs.sh
 
+WORKDIR /github/workspace
+
 ENTRYPOINT ["/etc/bin/entrypoint.sh"]

@@ -1,5 +1,5 @@
 VERSION := $(shell cat version)
-MAJOR_VERSION := $(shell cat version | sed 's/\.[0-9]*$//')
+MAJOR_VERSION := "v0"
 
 lint:
 	shellcheck -x entrypoint.sh get-logs.sh
@@ -12,6 +12,6 @@ push:
 
 release:
 	git tag -a -m "Release $(VERSION)" $(VERSION)
-	# git tag -a -m "Update $(MAJOR_VERSION)" $(MAJOR_VERSION)
-	git push --follow-tags
+	git tag -f $(MAJOR_VERSION)
+	git push origin tag $(MAJOR_VERSION)
 	gh release create $(VERSION) --generate-notes
