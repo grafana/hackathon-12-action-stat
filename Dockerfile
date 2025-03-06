@@ -1,6 +1,7 @@
 FROM grafana/alloy:latest
 
-LABEL org.opencontainers.image.source="https://github.com/grafana/hackathon-12-action-stat"
+LABEL org.opencontainers.image.source="https://github.com/grafana/hackathon-12-action-stat" \
+	org.opencontainers.image.description="Multi-arch GitHub Action to upload telemetry data to an OTLP endpoint"
 
 RUN (type -p wget >/dev/null || (apt update && apt-get install wget -y)) \
 	&& mkdir -p -m 755 /etc/apt/keyrings \
