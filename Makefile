@@ -1,7 +1,15 @@
-VERSION := $(shell cat version)																									# e.g. v1.2.3
-MINOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9].[0-9]\).[0-9]/\1/')  # e.g. v1.2
-MAJOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9]\).[0-9].[0-9]/\1/')  # e.g. v1
+VERSION := $(shell if [ -f version ]; then cat version; else echo "Error: version file not found"; exit 1; fi)  # e.g. v0.11.0
+MINOR_VERSION := $(shell echo $(VERSION) | cut -d. -f1,2)  # e.g. v0.11
+MAJOR_VERSION := $(shell echo $(VERSION) | cut -d. -f1)  # e.g. v0
+
 export DOCKER_BUILDKIT=1
+
+.PHONY: check-buildx check-arch check-docker build lint push release run-local run-shell ghcr-login versions
+
+versions:
+	@echo sem_var:	$(VERSION)
+	@echo minor:		$(MINOR_VERSION)
+	@echo major:		$(MAJOR_VERSION)
 
 ghcr-login:
 		source .env && echo $$CR_PAT | docker login ghcr.io -u $$USERNAME --password-stdin
