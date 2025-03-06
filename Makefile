@@ -2,8 +2,8 @@ VERSION := $(shell cat version)																									# e.g. v1.2.3
 MINOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9].[0-9]\).[0-9]/\1/')  # e.g. v1.2
 MAJOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9]\).[0-9].[0-9]/\1/')  # e.g. v1
 
-lint:
-	shellcheck -x entrypoint.sh get-logs.sh
+lint: scripts/entrypoint.sh scripts/get-logs.sh
+	shellcheck -x $<
 
 build: Dockerfile scripts/entrypoint.sh scripts/get-logs.sh version configs/upload-logs.alloy
 	docker build \

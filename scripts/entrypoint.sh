@@ -14,6 +14,21 @@ cd "${GITHUB_WORKSPACE}"
 export GITHUB_REPOSITORY=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 export WORKFLOW_NAME=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowName -q .workflowName)
 
+if [ -z "${TELEMETRY_URL:-}" ]; then
+  echo "TELEMETRY_URL is not set!"
+  exit 1
+fi
+
+if [ -z "${TELEMETRY_USERNAME:-}" ]; then
+  echo "TELEMETRY_USERNAME is not set!"
+  exit 1
+fi
+
+if [ -z "${TELEMETRY_PASSWORD:-}" ]; then
+  echo "TELEMETRY_PASSWORD is not set!"
+  exit 1
+fi
+
 # Run alloy in the background and save its PID
 alloy run /etc/alloy/upload-logs.alloy \
   --storage.path "/tmp/alloy" \
