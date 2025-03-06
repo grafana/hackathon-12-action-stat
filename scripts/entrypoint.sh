@@ -17,7 +17,7 @@ export WORKFLOW_NAME=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowName -q .
 # Run alloy in the background and save its PID
 alloy run /etc/alloy/upload-logs.alloy \
   --storage.path "/tmp/alloy" \
-  --stability.level public-preview \
+  --stability.level experimental \
   --disable-reporting &
 ALLOY_PID=$!
 
