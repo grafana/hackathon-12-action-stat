@@ -7,9 +7,6 @@ otelcol.receiver.filelog "run_log" {
   include_file_name_resolved = false
   include_file_path_resolved = false
 
-  multiline {
-    line_start_pattern = "^[^\\t]+\\t[^\\t]+\\t[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{7}Z"
-  }
   resource = {
     "repository.name" = sys.env("GITHUB_REPOSITORY"),
     "workflow.name" = sys.env("WORKFLOW_NAME"),
