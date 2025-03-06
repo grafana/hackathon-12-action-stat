@@ -12,10 +12,14 @@ RUN (type -p wget >/dev/null || (apt update && apt-get install wget -y)) \
 	&& apt install gh jq -y
 
 COPY version /version
-COPY upload-logs.alloy /etc/alloy/
-COPY entrypoint.sh get-logs.sh /etc/bin/
+COPY configs/upload-logs.alloy /etc/alloy/
+COPY scripts/entrypoint.sh /usr/local/bin/
+COPY scripts/get-logs.sh /usr/local/bin/
 
-RUN chmod +x /etc/bin/entrypoint.sh
-RUN chmod +x /etc/bin/get-logs.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/get-logs.sh
 
-ENTRYPOINT ["/etc/bin/entrypoint.sh"]
+ENV LOG_DIRECTORY="/var/log/action"
+RUN mkdir -p ${LOG_DIRECTORY}
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

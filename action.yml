@@ -15,7 +15,7 @@ runs:
     TELEMETRY_USERNAME: '${{ inputs.telemetry-username }}'
     TELEMETRY_PASSWORD: '${{ inputs.telemetry-password }}'
     WORKFLOW_RUN_ID: '${{ inputs.workflow-run-id }}'
-  
+    UPLOAD_TIMEOUT: '${{ inputs.upload-timeout }}'
 inputs:
   github-token:
     description: GitHub token for API access
@@ -32,3 +32,7 @@ inputs:
   workflow-run-id:
     description: Workflow run ID
     required: true
+  upload-timeout:
+    description: Upload timeout
+    required: false
+    default: 300

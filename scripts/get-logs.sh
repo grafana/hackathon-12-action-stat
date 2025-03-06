@@ -68,6 +68,7 @@ function main() {
     # Fetch logs for this job
     echo "Fetching job logs..."
     JOB_LOGS=$(gh run view --job "${JOB_ID}" --log)
+    echo "${JOB_LOGS}" > "${LOG_DIRECTORY}/job-${JOB_ID}.log"
 
     echo "Processing job steps..."
     
@@ -87,15 +88,16 @@ function main() {
           continue
       fi
 
-      STEP_LOG_PATTERN="${JOB_NAME}\t${STEP_NAME}"
-      STEP_LOGS=$(echo "${JOB_LOGS}" | grep "^${STEP_LOG_PATTERN}" || echo "No logs found for ${STEP_LOG_PATTERN}")
+      STEP_LOGS=$(echo "${JOB_LOGS}" | grep "^${JOB_NAME}"$'\t'"${STEP_NAME}")
 
       # Write step logs to file
-      echo "${STEP_LOGS}" > "${LOG_DIRECTORY}/job-${JOB_ID}-step-${STEP_NUMBER}.log"
-          
+      if [[ -n "${STEP_LOGS}" ]]; then
+        echo "${STEP_LOGS}" > "${LOG_DIRECTORY}/job-${JOB_ID}-step-${STEP_NUMBER}.log"
+      fi
+
       STEP_INDEX=$((STEP_INDEX + 1))
     done
-            
+
     JOB_INDEX=$((JOB_INDEX + 1))
   done
 

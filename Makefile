@@ -5,7 +5,7 @@ MAJOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9]\).[0-9].[0-9]/\1/')  
 lint:
 	shellcheck -x entrypoint.sh get-logs.sh
 
-build: Dockerfile entrypoint.sh get-logs.sh
+build: Dockerfile scripts/entrypoint.sh scripts/get-logs.sh version configs/upload-logs.alloy
 	docker build \
 		--platform linux/amd64 \
 		--tag ghcr.io/grafana/hackathon-12-action-stat:latest \
@@ -46,11 +46,32 @@ ifndef WORKFLOW_RUN_ID
 	$(error WORKFLOW_RUN_ID is not set)
 endif
 	docker run -it \
+		-e GITHUB_REPOSITORY=grafana/k8s-monitoring-helm \
 		-e GITHUB_WORKSPACE=/github/workspace \
 		-e GH_TOKEN \
 		-e TELEMETRY_URL \
 		-e TELEMETRY_USERNAME \
 		-e TELEMETRY_PASSWORD \
+		-e UPLOAD_TIMEOUT=300 \
 		-e WORKFLOW_RUN_ID \
 		-v $(shell pwd)/../k8s-monitoring-helm:/github/workspace:ro \
+		ghcr.io/grafana/hackathon-12-action-stat:latest
+
+run-shell:
+ifndef WORKFLOW_RUN_ID
+	$(error WORKFLOW_RUN_ID is not set)
+endif
+	docker run -it \
+		-e GITHUB_REPOSITORY=grafana/k8s-monitoring-helm \
+		-e GITHUB_WORKSPACE=/github/workspace \
+		-e GH_TOKEN \
+		-e TELEMETRY_URL \
+		-e TELEMETRY_USERNAME \
+		-e TELEMETRY_PASSWORD \
+		-e UPLOAD_TIMEOUT=300 \
+		-e WORKFLOW_RUN_ID \
+		-v $(shell pwd)/../k8s-monitoring-helm:/github/workspace:ro \
+		-v $(shell pwd)/scripts:/usr/local/bin \
+		-v $(shell pwd)/configs:/etc/alloy \
+		--entrypoint /bin/bash \
 		ghcr.io/grafana/hackathon-12-action-stat:latest
