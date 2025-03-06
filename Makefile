@@ -1,6 +1,6 @@
 VERSION := $(shell if [ -f version ]; then cat version; else echo "Error: version file not found"; exit 1; fi)  # e.g. v0.11.0
-MINOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9]*\.[0-9]*\)\.[0-9]*/\1/')  # e.g. v0.11
-MAJOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9]*\)\.[0-9]*\.[0-9]*/\1/')  # e.g. v0
+MINOR_VERSION := $(shell echo $(VERSION) | cut -d. -f1,2)  # e.g. v0.11
+MAJOR_VERSION := $(shell echo $(VERSION) | cut -d. -f1)  # e.g. v0
 
 export DOCKER_BUILDKIT=1
 
