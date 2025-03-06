@@ -1,33 +1,56 @@
 VERSION := $(shell cat version)																									# e.g. v1.2.3
 MINOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9].[0-9]\).[0-9]/\1/')  # e.g. v1.2
 MAJOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9]\).[0-9].[0-9]/\1/')  # e.g. v1
+export DOCKER_BUILDKIT=1
+
+ghcr-login:
+		source .env && echo $$CR_PAT | docker login ghcr.io -u $$USERNAME --password-stdin
+
+check-docker:
+	@if ! docker info &> /dev/null; then \
+		echo "Error: Docker daemon is not running. Please start Docker first."; \
+		exit 1; \
+	fi
+
+check-buildx: check-docker
+	@if ! command -v docker buildx &> /dev/null; then \
+		echo "Error: docker buildx is not installed. Please install it first."; \
+		exit 1; \
+	fi
+	@if ! docker buildx ls | grep -q "multiarch"; then \
+		echo "Creating multi-arch builder..."; \
+		docker buildx create --name multiarch --driver docker-container --bootstrap; \
+	fi
+	@docker buildx use multiarch
+	@if ! docker buildx ls | grep -q "linux/amd64.*linux/arm64"; then \
+		echo "Error: No buildx builder found supporting both linux/amd64 and linux/arm64."; \
+		echo "Please create a multi-arch builder using: docker buildx create --name multiarch --driver docker-container --bootstrap"; \
+		exit 1; \
+	fi
+
+check-arch: check-docker
+	@if ! docker buildx inspect | grep -q "linux/amd64"; then \
+		echo "Error: linux/amd64 architecture not supported by current builder."; \
+		exit 1; \
+	fi
+	@if ! docker buildx inspect | grep -q "linux/arm64"; then \
+		echo "Error: linux/arm64 architecture not supported by current builder."; \
+		exit 1; \
+	fi
 
 lint: scripts/entrypoint.sh scripts/get-logs.sh
 	shellcheck -x $<
 
-build: Dockerfile scripts/entrypoint.sh scripts/get-logs.sh version configs/upload-logs.alloy
-	docker build \
-		--platform linux/amd64 \
+build-push-image: check-docker check-buildx check-arch \
+	Dockerfile scripts/entrypoint.sh scripts/get-logs.sh version configs/upload-logs.alloy
+	docker buildx build \
+		--platform linux/amd64,linux/arm64 \
 		--tag ghcr.io/grafana/hackathon-12-action-stat:latest \
+		--tag ghcr.io/grafana/hackathon-12-action-stat:$(VERSION) \
+		--tag ghcr.io/grafana/hackathon-12-action-stat:$(MAJOR_VERSION) \
+		--tag ghcr.io/grafana/hackathon-12-action-stat:$(MINOR_VERSION) \
+		--push \
 		.
-
-	docker tag \
-		ghcr.io/grafana/hackathon-12-action-stat:latest \
-		ghcr.io/grafana/hackathon-12-action-stat:$(VERSION)
-
-	docker tag \
-		ghcr.io/grafana/hackathon-12-action-stat:$(VERSION) \
-		ghcr.io/grafana/hackathon-12-action-stat:$(MAJOR_VERSION)
-
-	docker tag \
-		ghcr.io/grafana/hackathon-12-action-stat:$(VERSION) \
-		ghcr.io/grafana/hackathon-12-action-stat:$(MINOR_VERSION)
-
-push:
-	docker push ghcr.io/grafana/hackathon-12-action-stat:latest
-	docker push ghcr.io/grafana/hackathon-12-action-stat:$(VERSION)
-	docker push ghcr.io/grafana/hackathon-12-action-stat:$(MINOR_VERSION)
-	docker push ghcr.io/grafana/hackathon-12-action-stat:$(MAJOR_VERSION)
 
 release:
 	git tag -a -m "Release $(VERSION)" $(VERSION)
@@ -41,11 +64,9 @@ release:
 	git push -f origin tag $(MAJOR_VERSION)
 
 
-run-local:
-ifndef WORKFLOW_RUN_ID
-	$(error WORKFLOW_RUN_ID is not set)
-endif
+run-local: check-docker
 	docker run -it \
+		--platform linux/$(shell uname -m) \
 		-e GITHUB_REPOSITORY=grafana/k8s-monitoring-helm \
 		-e GITHUB_WORKSPACE=/github/workspace \
 		-e GH_TOKEN \
@@ -59,11 +80,9 @@ endif
 		-v $(shell pwd)/configs:/etc/alloy \
 		ghcr.io/grafana/hackathon-12-action-stat:latest
 
-run-shell:
-ifndef WORKFLOW_RUN_ID
-	$(error WORKFLOW_RUN_ID is not set)
-endif
+run-shell: check-docker
 	docker run -it \
+		--platform linux/$(shell uname -m) \
 		-e GITHUB_REPOSITORY=grafana/k8s-monitoring-helm \
 		-e GITHUB_WORKSPACE=/github/workspace \
 		-e GH_TOKEN \
