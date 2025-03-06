@@ -12,6 +12,7 @@ cd "${GITHUB_WORKSPACE}"
 /usr/local/bin/get-logs.sh
 
 export GITHUB_REPOSITORY=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+export WORKFLOW_ID=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowDatabaseId -q .workflowDatabaseId)
 export WORKFLOW_NAME=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowName -q .workflowName)
 
 if [ -z "${TELEMETRY_URL:-}" ]; then

@@ -9,9 +9,12 @@ otelcol.receiver.filelog "run_log" {
 
   resource = {
     "repository.name" = sys.env("GITHUB_REPOSITORY"),
+    "service.name" = sys.env("WORKFLOW_NAME"),
+    "service.id" = sys.env("WORKFLOW_ID"),
+    "service.namespace" = sys.env("GITHUB_REPOSITORY"),
     "workflow.name" = sys.env("WORKFLOW_NAME"),
     "workflow.run_id" = sys.env("WORKFLOW_RUN_ID"),
-    "service_name" = "github_actions",
+    "source" =  "github_actions",
   }
 
   operators = [
@@ -35,6 +38,22 @@ otelcol.receiver.filelog "run_log" {
       on_error    = "drop",
     },
   ]
+
+  output {
+    logs = [
+      otelcol.processor.transform.set_attributes.input,
+    ]
+  }
+}
+
+otelcol.processor.transform "set_attributes" {
+  log_statements {
+    context = "resource"
+    statements = [
+      `delete_key(attributes, "log.file.path")`,
+      `delete_key(attributes, "timestamp")`,
+    ]
+  }
 
   output {
     logs = [
