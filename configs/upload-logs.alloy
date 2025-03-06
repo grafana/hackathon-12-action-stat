@@ -9,6 +9,9 @@ otelcol.receiver.filelog "run_log" {
   attributes = {
     "workflow.run_id" = sys.env("WORKFLOW_RUN_ID"),
   }
+  multiline {
+    line_start_pattern = "^[^\\t]+\\t[^\\t]+\\t[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{7}Z"
+  }
   resource = {
     "repository.name" = sys.env("GITHUB_REPOSITORY"),
     "workflow.name" = sys.env("GITHUB_WORKFLOW"),
@@ -25,13 +28,22 @@ otelcol.receiver.filelog "run_log" {
     {
       type       = "regex_parser",
       parse_from = "body",
-      regex      = "^(?P<job_name>[^\t]+)\t(?P<step_name>[^\t]+)\t(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{6}).*$",
+      regex      = "^(?P<job_name>[^\\t]+)\\t(?P<step_name>[^\\t]+)\\t(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{7}Z).*$",
       on_error   = "drop",
-      timestamp = {
-        parse_from  = "attributes.timestamp",
-        layout_type = "strptime",
-        layout      = "%Y-%m-%dT%H:%M:%S.%f",
-      },
+    },
+    {
+      type       = "regex_parser",
+      parse_from = "body",
+      parse_to   = "body",
+      regex      = "^[^\\t]+\\t[^\\t]+\\t[^ ]* ?(?P<message>.*)$",
+      on_error   = "drop",
+    },
+    {
+      type        = "time_parser",
+      parse_from  = "attributes.timestamp",
+      layout_type = "strptime",
+      layout      = "%Y-%m-%dT%H:%M:%S.%fZ",
+      on_error    = "drop",
     },
   ]
 
@@ -43,10 +55,10 @@ otelcol.receiver.filelog "run_log" {
   }
 }
 
-otelcol.exporter.debug "default" {
-  verbosity = "detailed"
-  use_internal_logger = false
-}
+otelcol.exporter.debug "default" {}
+//  verbosity = "detailed"
+//  use_internal_logger = false
+//}
 
 otelcol.exporter.otlphttp "destination" {
   client {

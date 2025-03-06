@@ -31,7 +31,7 @@ while true; do
   if [ $((SECONDS - START_TIME)) -ge "${UPLOAD_TIMEOUT}" ]; then
     echo "Timeout reached after ${UPLOAD_TIMEOUT} seconds. Killing Alloy process."
     kill $ALLOY_PID || true
-    return 1
+    exit 1
   fi
 
   # Check if log directory is empty
