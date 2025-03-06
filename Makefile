@@ -3,6 +3,9 @@ MINOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9].[0-9]\).[0-9]/\1/')  
 MAJOR_VERSION := $(shell echo $(VERSION) | sed 's/\(v[0-9]\).[0-9].[0-9]/\1/')  # e.g. v1
 export DOCKER_BUILDKIT=1
 
+ghcr-login:
+		source .env && echo $$CR_PAT | docker login ghcr.io -u $$USERNAME --password-stdin
+
 check-docker:
 	@if ! docker info &> /dev/null; then \
 		echo "Error: Docker daemon is not running. Please start Docker first."; \

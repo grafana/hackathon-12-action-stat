@@ -1,0 +1,25 @@
+# Ignore environment files
+.env
+*.env
+*.env.local
+*.env.development
+*.env.production
+my.env
+
+# Ignore Node.js dependencies (if applicable)
+node_modules/
+npm-debug.log
+
+# Ignore Python virtual environments (if applicable)
+venv/
+__pycache__/
+
+# Ignore Docker environment files (if using Docker)
+# .envrc
+.dockerignore
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp
+.DS_Store
