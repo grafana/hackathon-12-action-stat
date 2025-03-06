@@ -22,6 +22,7 @@ alloy run /etc/alloy/upload-logs.alloy \
 ALLOY_PID=$!
 
 # Set timeout duration (5 minutes = 300 seconds)
+UPLOAD_TIMEOUT=${UPLOAD_TIMEOUT:-300}
 START_TIME=$SECONDS
 
 # Watch for workflow_logs.json to be deleted or timeout

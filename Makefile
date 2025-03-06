@@ -55,6 +55,8 @@ endif
 		-e UPLOAD_TIMEOUT=300 \
 		-e WORKFLOW_RUN_ID \
 		-v $(shell pwd)/../k8s-monitoring-helm:/github/workspace:ro \
+		-v $(shell pwd)/scripts:/usr/local/bin \
+		-v $(shell pwd)/configs:/etc/alloy \
 		ghcr.io/grafana/hackathon-12-action-stat:latest
 
 run-shell:
