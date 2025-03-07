@@ -61,12 +61,12 @@ otelcol.receiver.filelog "github_actions_logs" {
   ]
 
   output {
-    logs = [otelcol.processor.batch.github_actions.input]
+    logs = [otelcol.processor.batch.github_actions_batch.input]
   }
 }
 
 // File log receiver for workflow metrics
-otelcol.receiver.filelog "workflow_metrics" {
+otelcol.receiver.filelog "github_actions_metrics" {
   include = [string.format("%s/*.log", env("METRICS_DIRECTORY"))]
   start_at = "beginning"
   delete_after_read = true
@@ -81,94 +81,86 @@ otelcol.receiver.filelog "workflow_metrics" {
   }
 
   operators = [
+    // First parse the entire body as JSON
     {
       type = "json_parser",
-      parse_to = "attributes",
-      timestamp = {
-        parse_from = "attributes.createdAt",
-        layout_type = "layout",
-        layout = "2006-01-02T15:04:05Z",
-      },
+      parse_from = "body",
+      parse_to = "attributes"
+    },
+    // Then parse timestamp from the now-available attributes
+    {
+      type = "time_parser",
+      parse_from = "attributes.createdAt",
+      layout_type = "layout",
+      layout = "2006-01-02T15:04:05Z",
+    },
+    // Workflow level attributes
+    {
+      type = "move",
+      from = "attributes.workflowName",
+      to = "attributes.workflow.name"
     },
     {
-      type = "metric_generator",
-      metric_name = "workflow.duration",
-      metric_type = "gauge",
-      metric_value = "attributes.duration",
-      metric_unit = "s",
-      metric_description = "Total workflow execution time from GitHub Actions API",
-      attributes = {
-        "workflow.name" = "EXPR(attributes.workflowName)",
-        "workflow.id" = "EXPR(attributes.workflowDatabaseId)",
-        "run.id" = "EXPR(attributes.databaseId)",
-        "run.number" = "EXPR(attributes.number)",
-        "run.attempt" = "EXPR(attributes.attempt)",
-        "run.conclusion" = "EXPR(attributes.conclusion)",
-        "run.status" = "EXPR(attributes.status)",
-        "run.event" = "EXPR(attributes.event)",
-        "run.branch" = "EXPR(attributes.headBranch)",
-        "run.sha" = "EXPR(attributes.headSha)",
-        "metric.source" = "json",
-      },
+      type = "move",
+      from = "attributes.workflowDatabaseId",
+      to = "attributes.workflow.id"
     },
     {
-      type = "metric_generator",
-      metric_name = "workflow.job.duration",
-      metric_type = "gauge",
-      metric_value = "EXPR(attributes.jobs[].duration)",
-      metric_unit = "s",
-      metric_description = "Job execution time from GitHub Actions API",
-      attributes = {
-        "workflow.name" = "EXPR(attributes.workflowName)",
-        "workflow.id" = "EXPR(attributes.workflowDatabaseId)",
-        "run.id" = "EXPR(attributes.databaseId)",
-        "run.number" = "EXPR(attributes.number)",
-        "run.attempt" = "EXPR(attributes.attempt)",
-        "run.conclusion" = "EXPR(attributes.conclusion)",
-        "run.status" = "EXPR(attributes.status)",
-        "run.event" = "EXPR(attributes.event)",
-        "run.branch" = "EXPR(attributes.headBranch)",
-        "run.sha" = "EXPR(attributes.headSha)",
-        "job.name" = "EXPR(attributes.jobs[].name)",
-        "job.id" = "EXPR(attributes.jobs[].databaseId)",
-        "job.status" = "EXPR(attributes.jobs[].status)",
-        "job.conclusion" = "EXPR(attributes.jobs[].conclusion)",
-        "metric.source" = "json",
-      },
+      type = "move",
+      from = "attributes.databaseId",
+      to = "attributes.run.id"
     },
     {
-      type = "metric_generator",
-      metric_name = "workflow.step.duration",
-      metric_type = "gauge",
-      metric_value = "EXPR(attributes.jobs[].steps[].duration)",
-      metric_unit = "s",
-      metric_description = "Step execution time from GitHub Actions API",
-      attributes = {
-        "workflow.name" = "EXPR(attributes.workflowName)",
-        "workflow.id" = "EXPR(attributes.workflowDatabaseId)",
-        "run.id" = "EXPR(attributes.databaseId)",
-        "run.number" = "EXPR(attributes.number)",
-        "run.attempt" = "EXPR(attributes.attempt)",
-        "run.conclusion" = "EXPR(attributes.conclusion)",
-        "run.status" = "EXPR(attributes.status)",
-        "run.event" = "EXPR(attributes.event)",
-        "run.branch" = "EXPR(attributes.headBranch)",
-        "run.sha" = "EXPR(attributes.headSha)",
-        "job.name" = "EXPR(attributes.jobs[].name)",
-        "job.id" = "EXPR(attributes.jobs[].databaseId)",
-        "job.status" = "EXPR(attributes.jobs[].status)",
-        "job.conclusion" = "EXPR(attributes.jobs[].conclusion)",
-        "step.name" = "EXPR(attributes.jobs[].steps[].name)",
-        "step.number" = "EXPR(attributes.jobs[].steps[].number)",
-        "step.status" = "EXPR(attributes.jobs[].steps[].status)",
-        "step.conclusion" = "EXPR(attributes.jobs[].steps[].conclusion)",
-        "metric.source" = "json",
-      },
+      type = "move",
+      from = "attributes.status",
+      to = "attributes.run.status"
     },
+    {
+      type = "move",
+      from = "attributes.conclusion",
+      to = "attributes.run.conclusion"
+    },
+    {
+      type = "move",
+      from = "attributes.duration",
+      to = "attributes.workflow.duration"
+    },
+    // Job level attributes
+    {
+      type = "copy",
+      from = "attributes.jobs[].name",
+      to = "attributes.workflow.job.name"
+    },
+    {
+      type = "copy",
+      from = "attributes.jobs[].status",
+      to = "attributes.workflow.job.status"
+    },
+    {
+      type = "copy",
+      from = "attributes.jobs[].duration",
+      to = "attributes.workflow.job.duration"
+    },
+    // Step level attributes
+    {
+      type = "copy",
+      from = "attributes.jobs[].steps[].name",
+      to = "attributes.workflow.step.name"
+    },
+    {
+      type = "copy",
+      from = "attributes.jobs[].steps[].status",
+      to = "attributes.workflow.step.status"
+    },
+    {
+      type = "copy",
+      from = "attributes.jobs[].steps[].duration",
+      to = "attributes.workflow.step.duration"
+    }
   ]
 
   output {
-    metrics = [otelcol.processor.batch.github_actions.input]
+    metrics = [otelcol.exporter.otlphttp.destination.input]
   }
 }
 
@@ -177,18 +169,17 @@ otelcol.receiver.filelog "workflow_metrics" {
 /////////////////////////////////////////////////////////////
 
 // Batch processor for better performance
-otelcol.processor.batch "github_actions" {
+otelcol.processor.batch "github_actions_batch" {
   timeout = "1s"
   send_batch_size = 1024
 
   output {
-    logs = [otelcol.processor.transform.github_actions.input]
-    metrics = [otelcol.processor.transform.github_actions.input]
+    logs = [otelcol.processor.transform.github_actions_transform.input]
   }
 }
 
 // Transform processor to standardize attributes
-otelcol.processor.transform "github_actions" {
+otelcol.processor.transform "github_actions_transform" {
   error_mode = "ignore"
   
   log_statements {
@@ -211,8 +202,7 @@ otelcol.processor.transform "github_actions" {
   }
 
   output {
-    logs = [otelcol.exporter.otlphttp.destination.input]
-    metrics = [otelcol.exporter.otlphttp.destination.input]
+    logs = [otelcol.connector.spanmetrics.metrics_from_logs.input]
   }
 }
 
@@ -223,7 +213,7 @@ otelcol.processor.transform "github_actions" {
 // Extract metrics from logs
 otelcol.connector.spanmetrics "metrics_from_logs" {
   metrics_flush_interval = "15s"
-  dimension = [
+  dimensions = [
     "workflow.name",
     "workflow.job.name",
     "workflow.step.name",
@@ -238,7 +228,7 @@ otelcol.connector.spanmetrics "metrics_from_logs" {
   }
 
   output {
-    logs = [otelcol.exporter.otlphttp.destination.input]
+    metrics = [otelcol.exporter.otlphttp.destination.input]
   }
 }
 
