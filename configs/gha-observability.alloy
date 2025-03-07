@@ -213,7 +213,7 @@ otelcol.processor.transform "github_actions_transform" {
 // Extract metrics from logs
 otelcol.connector.spanmetrics "metrics_from_logs" {
   metrics_flush_interval = "15s"
-  aggregation_temporality = "AGGREGATION_TEMPORALITY_CUMULATIVE"
+  aggregation_temporality = "cumulative"
   namespace = "github.actions"
   
   dimension {
