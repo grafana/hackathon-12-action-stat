@@ -85,7 +85,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       type = "json_parser",
       parse_from = "body",
-      parse_to = "attributes"
+      parse_to = "attributes",
     },
     // Then parse timestamp from the now-available attributes
     {
@@ -98,65 +98,65 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       type = "move",
       from = "attributes.workflowName",
-      to = "attributes.workflow.name"
+      to = "attributes.workflow.name",
     },
     {
       type = "move",
       from = "attributes.workflowDatabaseId",
-      to = "attributes.workflow.id"
+      to = "attributes.workflow.id",
     },
     {
       type = "move",
       from = "attributes.databaseId",
-      to = "attributes.run.id"
+      to = "attributes.run.id",
     },
     {
       type = "move",
       from = "attributes.status",
-      to = "attributes.run.status"
+      to = "attributes.run.status",
     },
     {
       type = "move",
       from = "attributes.conclusion",
-      to = "attributes.run.conclusion"
+      to = "attributes.run.conclusion",
     },
     {
       type = "move",
       from = "attributes.duration",
-      to = "attributes.workflow.duration"
+      to = "attributes.workflow.duration",
     },
     // Job level attributes
     {
       type = "copy",
       from = "attributes.jobs[].name",
-      to = "attributes.workflow.job.name"
+      to = "attributes.workflow.job.name",
     },
     {
       type = "copy",
       from = "attributes.jobs[].status",
-      to = "attributes.workflow.job.status"
+      to = "attributes.workflow.job.status",
     },
     {
       type = "copy",
       from = "attributes.jobs[].duration",
-      to = "attributes.workflow.job.duration"
+      to = "attributes.workflow.job.duration",
     },
     // Step level attributes
     {
       type = "copy",
       from = "attributes.jobs[].steps[].name",
-      to = "attributes.workflow.step.name"
+      to = "attributes.workflow.step.name",
     },
     {
       type = "copy",
       from = "attributes.jobs[].steps[].status",
-      to = "attributes.workflow.step.status"
+      to = "attributes.workflow.step.status",
     },
     {
       type = "copy",
       from = "attributes.jobs[].steps[].duration",
-      to = "attributes.workflow.step.duration"
-    }
+      to = "attributes.workflow.step.duration",
+    },
   ]
 
   output {
