@@ -35,4 +35,4 @@ inputs:
   upload-timeout:
     description: Upload timeout
     required: false
-    default: 300
+    default: '300'
