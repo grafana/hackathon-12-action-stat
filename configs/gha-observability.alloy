@@ -128,33 +128,33 @@ otelcol.receiver.filelog "github_actions_metrics" {
     // Job level attributes
     {
       type = "copy",
-      from = "attributes.jobs[].name",
+      from = "attributes.jobs[\"*\"].name",
       to = "attributes.workflow.job.name",
     },
     {
       type = "copy",
-      from = "attributes.jobs[].status",
+      from = "attributes.jobs[\"*\"].status",
       to = "attributes.workflow.job.status",
     },
     {
       type = "copy",
-      from = "attributes.jobs[].duration",
+      from = "attributes.jobs[\"*\"].duration",
       to = "attributes.workflow.job.duration",
     },
     // Step level attributes
     {
       type = "copy",
-      from = "attributes.jobs[].steps[].name",
+      from = "attributes.jobs[\"*\"].steps[\"*\"].name",
       to = "attributes.workflow.step.name",
     },
     {
       type = "copy",
-      from = "attributes.jobs[].steps[].status",
+      from = "attributes.jobs[\"*\"].steps[\"*\"].status",
       to = "attributes.workflow.step.status",
     },
     {
       type = "copy",
-      from = "attributes.jobs[].steps[].duration",
+      from = "attributes.jobs[\"*\"].steps[\"*\"].duration",
       to = "attributes.workflow.step.duration",
     },
   ]
@@ -213,7 +213,7 @@ otelcol.processor.transform "github_actions_transform" {
 // Extract metrics from logs
 otelcol.connector.spanmetrics "metrics_from_logs" {
   metrics_flush_interval = "15s"
-  dimensions = [
+  dimension = [
     "workflow.name",
     "workflow.job.name",
     "workflow.step.name",
