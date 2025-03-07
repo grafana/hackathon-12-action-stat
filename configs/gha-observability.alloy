@@ -1,6 +1,3 @@
-// Endpoints
-telemetry_endpoint = env("TELEMETRY_URL")
-
 // GitHub Actions paths
 gha_logs_path = env("LOGS_DIRECTORY") || "/var/log/gha/logs/*.log"
 gha_metrics_path = env("METRICS_DIRECTORY") || "/var/log/gha/metrics/*.json"
@@ -245,7 +242,7 @@ otelcol.connector.spanmetrics "github_actions" {
   }
 
   output {
-    logs = loki.process.github_actions.input
+    logs = otelcol.exporter.otlphttp.destination.input
   }
 }
 
@@ -253,61 +250,10 @@ otelcol.connector.spanmetrics "github_actions" {
 // EXPORTERS
 /////////////////////////////////////////////////////////////
 
-// Process logs for Loki
-loki.process "github_actions" {
-  forward_to = [loki.write.github_actions.receiver]
-  
-  // Extract labels for better querying
-  stage.json {
-    expressions = {
-      workflow_name = "workflow.name",
-      job_name = "workflow.job.name",
-      step_name = "workflow.step.name",
-      run_id = "workflow.run_id",
-      status = "run.status",
-      conclusion = "run.conclusion",
-      metric_source = "metric.source",
-    }
-  }
-
-  // Add static labels
-  stage.static_labels {
-    values = {
-      job = "github_actions",
-      source = "github_actions",
-    }
-  }
-
-  // Add dynamic labels
-  stage.labels {
-    values = {
-      workflow = "workflow.name",
-      job = "workflow.job.name",
-      step = "workflow.step.name",
-      run_id = "workflow.run_id",
-      status = "run.status",
-      conclusion = "run.conclusion",
-      metric_source = "metric.source",
-    }
-  }
-}
-
-// Send logs to Loki
-loki.write "github_actions" {
-  endpoint {
-    url = telemetry_endpoint
-  }
-  
-  external_labels = {
-    source = "github_actions",
-    environment = env("ENVIRONMENT") || "production",
-  }
-}
-
 // Common exporter configuration
 otelcol.exporter.otlphttp "destination" {
   client {
-    endpoint = telemetry_endpoint
+    endpoint = env("TELEMETRY_URL")
     auth = otelcol.auth.basic.destination.handler
   }
 }
