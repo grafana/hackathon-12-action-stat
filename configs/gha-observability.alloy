@@ -40,7 +40,7 @@ otelcol.receiver.filelog "github_actions_logs" {
     {
       type = "regex_parser",
       parse_from = "attributes[\"log.file.name\"]",
-      regex = "^job-(?P<job_id>[0-9]+)-step-(?P<step_id>[0-9]+)\\.log$",
+      regex = "^job-(?P<job_id>[0-9]+)-step-(?P<step_number>[0-9]+)\\.log$",
       on_error = "drop",
     },
     // Parse log line format
@@ -189,14 +189,14 @@ otelcol.processor.transform "github_actions_transform" {
       "set(attributes[\"workflow.job.name\"], attributes[\"job_name\"]) where attributes[\"job_name\"] != nil",
       "set(attributes[\"workflow.step.name\"], attributes[\"step_name\"]) where attributes[\"step_name\"] != nil",
       "set(attributes[\"workflow.job.id\"], attributes[\"job_id\"]) where attributes[\"job_id\"] != nil",
-      "set(attributes[\"workflow.step.id\"], attributes[\"step_id\"]) where attributes[\"step_id\"] != nil",
+      "set(attributes[\"workflow.step.id\"], attributes[\"step_number\"]) where attributes[\"step_number\"] != nil",
       // Add metric source
       "set(attributes[\"metric.source\"], \"logs\")",
       // Clean up temporary attributes
       "delete_key(attributes, \"job_name\")",
       "delete_key(attributes, \"step_name\")",
       "delete_key(attributes, \"job_id\")",
-      "delete_key(attributes, \"step_id\")",
+      "delete_key(attributes, \"step_number\")",
       "delete_key(attributes, \"timestamp\")",
     ]
   }
