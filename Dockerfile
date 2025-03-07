@@ -19,10 +19,10 @@ COPY scripts/collect-logs.sh /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/collect-logs.sh
 
-ENV LOGS_DIRECTORY="/var/log/action"
+ENV LOGS_DIRECTORY="github-actions/logs"
 RUN mkdir -p ${LOGS_DIRECTORY}
 
-ENV LOG_DIRECTORY="/var/log/action"
-RUN mkdir -p ${LOG_DIRECTORY}
+ENV METRICS_DIRECTORY="github-actions/metrics"
+RUN mkdir -p ${METRICS_DIRECTORY}
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

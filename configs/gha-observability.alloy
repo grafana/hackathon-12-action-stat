@@ -2,8 +2,8 @@
 telemetry_endpoint = env("TELEMETRY_URL")
 
 // GitHub Actions paths
-gha_logs_path = env("LOGS_DIRECTORY") || "/var/log/github-actions/logs/*.log"
-gha_metrics_path = env("METRICS_DIRECTORY") || "/var/log/github-actions/metrics/*.json"
+gha_logs_path = env("LOGS_DIRECTORY") || "github-actions/logs/*.log"
+gha_metrics_path = env("METRICS_DIRECTORY") || "github-actions/metrics/*.json"
 
 /////////////////////////////////////////////////////////////
 // METRIC NAMING CONVENTIONS
