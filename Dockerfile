@@ -14,11 +14,10 @@ RUN (type -p wget >/dev/null || (apt update && apt-get install wget -y)) \
 	&& apt update \
 	&& apt install gh jq -y
 
-COPY version /version \
-	configs/gha-observability.alloy /etc/alloy/ \
-	scripts/entrypoint.sh /usr/local/bin/ \
-	scripts/collect-logs.sh /usr/local/bin/ \
-	scripts/collect-metrics.sh /usr/local/bin/
+COPY version /version
+COPY configs/gha-observability.alloy /etc/alloy/
+COPY scripts/entrypoint.sh scripts/collect-logs.sh scripts/collect-metrics.sh \
+  /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
 	/usr/local/bin/collect-logs.sh \
