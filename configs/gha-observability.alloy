@@ -1,7 +1,3 @@
-// GitHub Actions paths
-gha_logs_path = env("LOGS_DIRECTORY") || "/var/log/gha/logs/*.log"
-gha_metrics_path = env("METRICS_DIRECTORY") || "/var/log/gha/metrics/*.json"
-
 /////////////////////////////////////////////////////////////
 // METRIC NAMING CONVENTIONS
 /////////////////////////////////////////////////////////////
@@ -26,7 +22,7 @@ gha_metrics_path = env("METRICS_DIRECTORY") || "/var/log/gha/metrics/*.json"
 
 // File log receiver for GitHub Actions workflow logs
 otelcol.receiver.filelog "github_actions_logs" {
-  include = [gha_logs_path]
+  include = [string.format("%s/*.log", sys.env(LOGS_DIRECTORY))]
   start_at = "beginning"
   delete_after_read = true
   
@@ -71,7 +67,7 @@ otelcol.receiver.filelog "github_actions_logs" {
 
 // File log receiver for workflow metrics
 otelcol.receiver.filelog "workflow_metrics" {
-  include = [gha_metrics_path]
+  include = [string.format("%s/*.log", sys.env(METRICS_DIRECTORY))]
   start_at = "beginning"
   delete_after_read = true
   
