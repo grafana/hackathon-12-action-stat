@@ -213,15 +213,14 @@ otelcol.processor.transform "github_actions_transform" {
 // Extract metrics from logs
 otelcol.connector.spanmetrics "metrics_from_logs" {
   metrics_flush_interval = "15s"
-  dimension = [
-    "workflow.name",
-    "workflow.job.name",
-    "workflow.step.name",
-    "run.status",
-    "run.conclusion",
-    "metric.source",
-  ]
-  
+  dimensions 
+    - name: workflow.name
+    - name: workflow.job.name
+    - name: workflow.step.name
+    - name: run.status
+    - name: run.conclusion
+    - name: metric.source
+    
   histogram {
     unit = "s"
     max_size = 100
