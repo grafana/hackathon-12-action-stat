@@ -77,6 +77,8 @@ run-local: check-docker
 		--platform linux/$(shell uname -m) \
 		-e GITHUB_REPOSITORY=grafana/k8s-monitoring-helm \
 		-e GITHUB_WORKSPACE=/github/workspace \
+		-e LOGS_DIRECTORY=/var/log/gha/logs \
+		-e METRICS_DIRECTORY=/var/log/gha/metrics \
 		-e GH_TOKEN \
 		-e TELEMETRY_URL \
 		-e TELEMETRY_USERNAME \
@@ -93,6 +95,8 @@ run-shell: check-docker
 		--platform linux/$(shell uname -m) \
 		-e GITHUB_REPOSITORY=grafana/k8s-monitoring-helm \
 		-e GITHUB_WORKSPACE=/github/workspace \
+		-e LOGS_DIRECTORY=/var/log/gha/logs \
+		-e METRICS_DIRECTORY=/var/log/gha/metrics \
 		-e GH_TOKEN \
 		-e TELEMETRY_URL \
 		-e TELEMETRY_USERNAME \

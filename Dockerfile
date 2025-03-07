@@ -23,10 +23,10 @@ RUN chmod +x /usr/local/bin/entrypoint.sh \
 	/usr/local/bin/collect-logs.sh \
 	/usr/local/bin/collect-metrics.sh
 
-ENV LOGS_DIRECTORY="github-actions/logs"
+ENV LOGS_DIRECTORY="/var/log/gha/logs"
 RUN mkdir -p ${LOGS_DIRECTORY}
 
-ENV METRICS_DIRECTORY="github-actions/metrics"
+ENV METRICS_DIRECTORY="/var/log/gha/metrics"
 RUN mkdir -p ${METRICS_DIRECTORY}
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
