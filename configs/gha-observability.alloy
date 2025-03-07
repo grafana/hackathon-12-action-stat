@@ -216,7 +216,7 @@ otelcol.connector.spanmetrics "metrics_from_logs" {
   aggregation_temporality = "AGGREGATION_TEMPORALITY_CUMULATIVE"
   namespace = "github.actions"
   
-  dimensions = {
+  dimension = {
     name = "workflow.name",
     name = "workflow.job.name",
     name = "workflow.step.name",
