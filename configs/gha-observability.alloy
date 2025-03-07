@@ -221,9 +221,9 @@ otelcol.processor.transform "github_actions" {
 /////////////////////////////////////////////////////////////
 
 // Extract metrics from logs
-otelcol.connector.spanmetrics "github_actions" {
+otelcol.connector.spanmetrics "metrics_from_logs" {
   metrics_flush_interval = "15s"
-  dimensions_attributes = [
+  dimension = [
     "workflow.name",
     "workflow.job.name",
     "workflow.step.name",
