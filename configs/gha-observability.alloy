@@ -61,7 +61,7 @@ otelcol.receiver.filelog "github_actions_logs" {
   ]
 
   output {
-    logs = otelcol.processor.batch.github_actions.input
+    logs = [otelcol.processor.batch.github_actions.input]
   }
 }
 
@@ -168,7 +168,7 @@ otelcol.receiver.filelog "workflow_metrics" {
   ]
 
   output {
-    metrics = otelcol.processor.batch.github_actions.input
+    metrics = [otelcol.processor.batch.github_actions.input]
   }
 }
 
@@ -182,8 +182,8 @@ otelcol.processor.batch "github_actions" {
   send_batch_size = 1024
 
   output {
-    logs = otelcol.processor.transform.github_actions.input
-    metrics = otelcol.processor.transform.github_actions.input
+    logs = [otelcol.processor.transform.github_actions.input]
+    metrics = [otelcol.processor.transform.github_actions.input]
   }
 }
 
@@ -211,8 +211,8 @@ otelcol.processor.transform "github_actions" {
   }
 
   output {
-    logs = otelcol.exporter.otlphttp.destination.input
-    metrics = otelcol.exporter.otlphttp.destination.input
+    logs = [otelcol.exporter.otlphttp.destination.input]
+    metrics = [otelcol.exporter.otlphttp.destination.input]
   }
 }
 
@@ -238,7 +238,7 @@ otelcol.connector.spanmetrics "github_actions" {
   }
 
   output {
-    logs = otelcol.exporter.otlphttp.destination.input
+    logs = [otelcol.exporter.otlphttp.destination.input]
   }
 }
 
