@@ -15,9 +15,9 @@ RUN (type -p wget >/dev/null || (apt update && apt-get install wget -y)) \
 COPY version /version
 COPY configs/upload-logs.alloy /etc/alloy/
 COPY scripts/entrypoint.sh /usr/local/bin/
-COPY scripts/get-logs.sh /usr/local/bin/
+COPY scripts/collect-logs.sh /usr/local/bin/
 
-RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/get-logs.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/collect-logs.sh
 
 ENV LOG_DIRECTORY="/var/log/action"
 RUN mkdir -p ${LOG_DIRECTORY}
