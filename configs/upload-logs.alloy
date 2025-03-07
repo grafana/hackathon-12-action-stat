@@ -1,5 +1,5 @@
 otelcol.receiver.filelog "run_log" {
-  include = [string.format("%s/job-*-step-*.log", sys.env("LOG_DIRECTORY"))]
+  include = [string.format("%s/job-*-step-*.log", sys.env("LOGS_DIRECTORY"))]
   start_at = "beginning"
   delete_after_read = true
   include_file_name = true

@@ -51,7 +51,7 @@ while true; do
   fi
 
   # Check if log directory is empty
-  if [[ -z "$(ls -A "${LOG_DIRECTORY}")" ]]; then
+  if [[ -z "$(ls -A "${LOGS_DIRECTORY}")" ]]; then
     kill "${ALLOY_PID}" || true
     break
   fi

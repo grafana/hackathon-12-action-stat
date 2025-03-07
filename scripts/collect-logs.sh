@@ -11,8 +11,8 @@ function main() {
   fi
 
   # Ensure Log directory is set
-  if [[ -z "${LOG_DIRECTORY:-}" ]]; then
-    echo -e "\033[31mError: LOG_DIRECTORY must be set.\033[0m"
+  if [[ -z "${LOGS_DIRECTORY:-}" ]]; then
+    echo -e "\033[31mError: LOGS_DIRECTORY must be set.\033[0m"
     exit 1
   fi
 
@@ -68,7 +68,7 @@ function main() {
     # Fetch logs for this job
     echo "Fetching job logs..."
     JOB_LOGS=$(gh run view --job "${JOB_ID}" --log)
-    echo "${JOB_LOGS}" > "${LOG_DIRECTORY}/job-${JOB_ID}.log"
+    echo "${JOB_LOGS}" > "${LOGS_DIRECTORY}/job-${JOB_ID}.log"
 
     echo "Processing job steps..."
     
@@ -92,7 +92,7 @@ function main() {
 
       # Write step logs to file
       if [[ -n "${STEP_LOGS}" ]]; then
-        echo "${STEP_LOGS}" > "${LOG_DIRECTORY}/job-${JOB_ID}-step-${STEP_NUMBER}.log"
+        echo "${STEP_LOGS}" > "${LOGS_DIRECTORY}/job-${JOB_ID}-step-${STEP_NUMBER}.log"
       fi
 
       STEP_INDEX=$((STEP_INDEX + 1))
@@ -102,11 +102,11 @@ function main() {
   done
 
   # Print confirmation
-  FILE_COUNT=$(find "${LOG_DIRECTORY}" -type f | wc -l) || true
+  FILE_COUNT=$(find "${LOGS_DIRECTORY}" -type f | wc -l) || true
   if [[ "${FILE_COUNT}" -gt 0 ]]; then
-    echo "Successfully processed workflow logs: ${FILE_COUNT} files written to ${LOG_DIRECTORY}"
+    echo "Successfully processed workflow logs: ${FILE_COUNT} files written to ${LOGS_DIRECTORY}"
   else
-    echo -e "\033[33mWarning: No log files were created in ${LOG_DIRECTORY}\033[0m"
+    echo -e "\033[33mWarning: No log files were created in ${LOGS_DIRECTORY}\033[0m"
   fi
 }
 
