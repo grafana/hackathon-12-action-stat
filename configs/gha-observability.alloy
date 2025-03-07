@@ -189,7 +189,7 @@ otelcol.processor.batch "github_actions" {
   send_batch_size = 1024
 
   output {
-    logs = otelcol.processor.transform.github_actions.input,
+    logs = otelcol.processor.transform.github_actions.input
     metrics = otelcol.processor.transform.github_actions.input
   }
 }
@@ -213,7 +213,7 @@ otelcol.processor.transform "github_actions" {
       "delete_key(attributes, \"step_name\")",
       "delete_key(attributes, \"job_id\")",
       "delete_key(attributes, \"step_id\")",
-      "delete_key(attributes, \"timestamp\")"
+      "delete_key(attributes, \"timestamp\")",
     ]
   }
 
@@ -236,7 +236,7 @@ otelcol.connector.spanmetrics "github_actions" {
     "workflow.step.name",
     "run.status",
     "run.conclusion",
-    "metric.source"
+    "metric.source",
   ]
   
   histogram {
@@ -307,7 +307,7 @@ loki.write "github_actions" {
 // Common exporter configuration
 otelcol.exporter.otlphttp "destination" {
   client {
-    endpoint = telemetry_endpoint,
+    endpoint = telemetry_endpoint
     auth = otelcol.auth.basic.destination.handler
   }
 }
