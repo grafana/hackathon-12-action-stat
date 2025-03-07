@@ -22,7 +22,7 @@
 
 // File log receiver for GitHub Actions workflow logs
 otelcol.receiver.filelog "github_actions_logs" {
-  include = [string.format("%s/*.log", sys.env(LOGS_DIRECTORY))]
+  include = [string.format("%s/*.log", env("LOGS_DIRECTORY"))]
   start_at = "beginning"
   delete_after_read = true
   
@@ -67,7 +67,7 @@ otelcol.receiver.filelog "github_actions_logs" {
 
 // File log receiver for workflow metrics
 otelcol.receiver.filelog "workflow_metrics" {
-  include = [string.format("%s/*.log", sys.env(METRICS_DIRECTORY))]
+  include = [string.format("%s/*.log", env("METRICS_DIRECTORY"))]
   start_at = "beginning"
   delete_after_read = true
   
