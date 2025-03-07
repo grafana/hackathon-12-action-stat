@@ -50,7 +50,7 @@ lint: scripts/entrypoint.sh scripts/collect-logs.sh
 	shellcheck -x $<
 
 build-push-image: check-docker check-buildx check-arch \
-	Dockerfile scripts/entrypoint.sh scripts/collect-logs.sh version configs/upload-logs.alloy
+	Dockerfile scripts/entrypoint.sh scripts/collect-logs.sh version configs/gha-observability.alloy
 	docker buildx build \
 		--platform linux/amd64,linux/arm64 \
 		--tag ghcr.io/grafana/hackathon-12-action-stat:latest \

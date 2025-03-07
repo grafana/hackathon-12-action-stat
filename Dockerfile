@@ -13,7 +13,7 @@ RUN (type -p wget >/dev/null || (apt update && apt-get install wget -y)) \
 	&& apt install gh jq -y
 
 COPY version /version
-COPY configs/upload-logs.alloy /etc/alloy/
+COPY configs/gha-observability.alloy /etc/alloy/
 COPY scripts/entrypoint.sh /usr/local/bin/
 COPY scripts/collect-logs.sh /usr/local/bin/
 

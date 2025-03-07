@@ -31,7 +31,7 @@ if [ -z "${TELEMETRY_PASSWORD:-}" ]; then
 fi
 
 # Run alloy in the background and save its PID
-alloy run /etc/alloy/upload-logs.alloy \
+alloy run /etc/alloy/gha-observability.alloy \
   --storage.path "/tmp/alloy" \
   --stability.level experimental \
   --disable-reporting &

@@ -1,0 +1,318 @@
+// Endpoints
+telemetry_endpoint = env("TELEMETRY_URL")
+
+// GitHub Actions paths
+gha_logs_path = env("LOGS_DIRECTORY") || "/var/log/github-actions/logs/*.log"
+gha_metrics_path = env("METRICS_DIRECTORY") || "/var/log/github-actions/metrics/*.json"
+
+/////////////////////////////////////////////////////////////
+// METRIC NAMING CONVENTIONS
+/////////////////////////////////////////////////////////////
+// Source: JSON (Authoritative)
+// - workflow.duration: Total workflow execution time
+//   Calculated as: (updatedAt - createdAt) for completed workflows
+//   or (current_time - startedAt) for running workflows
+// - workflow.job.duration: Job execution time
+//   Calculated as: (completed_at - started_at) for completed jobs
+//   or (current_time - started_at) for running jobs
+// - workflow.step.duration: Step execution time
+//   Calculated as: (completed_at - started_at) for completed steps
+//   or (current_time - started_at) for running steps
+// - workflow.status: Current workflow status
+// - workflow.conclusion: Workflow conclusion
+// - workflow.job.status: Job status
+// - workflow.step.status: Step status
+
+/////////////////////////////////////////////////////////////
+// RECEIVERS
+/////////////////////////////////////////////////////////////
+
+// File log receiver for GitHub Actions workflow logs
+otelcol.receiver.filelog "github_actions_logs" {
+  include = [gha_logs_path]
+  start_at = "beginning"
+  delete_after_read = true
+  
+  resource = {
+    "service.name" = "github_actions",
+    "service.namespace" = env("GITHUB_REPOSITORY"),
+    "workflow.name" = env("WORKFLOW_NAME"),
+    "workflow.run_id" = env("WORKFLOW_RUN_ID"),
+    "source" = "github_actions",
+    "metric.source" = "logs"
+  }
+
+  operators = [
+    // Parse job and step information from filename
+    {
+      type = "regex_parser"
+      parse_from = "attributes[\"log.file.name\"]"
+      regex = "^job-(?P<job_id>[0-9]+)-step-(?P<step_id>[0-9]+)\\.log$"
+      on_error = "drop"
+    },
+    // Parse log line format
+    {
+      type = "regex_parser"
+      parse_from = "body"
+      regex = "^(?P<job_name>[^\\t]+)\\t(?P<step_name>[^\\t]+)\\t(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{7}Z).*$"
+      on_error = "drop"
+    },
+    // Parse timestamp
+    {
+      type = "time_parser"
+      parse_from = "attributes.timestamp"
+      layout_type = "strptime"
+      layout = "%Y-%m-%dT%H:%M:%S.%fZ"
+      on_error = "drop"
+    }
+  ]
+
+  output {
+    logs = otelcol.processor.batch.github_actions.input
+  }
+}
+
+// File log receiver for workflow metrics
+otelcol.receiver.filelog "workflow_metrics" {
+  include = [gha_metrics_path]
+  start_at = "beginning"
+  delete_after_read = true
+  
+  resource = {
+    "service.name" = "github_actions",
+    "service.namespace" = env("GITHUB_REPOSITORY"),
+    "workflow.name" = env("WORKFLOW_NAME"),
+    "workflow.run_id" = env("WORKFLOW_RUN_ID"),
+    "source" = "github_actions",
+    "metric.source" = "json"
+  }
+
+  operators = [
+    {
+      type = "json_parser"
+      parse_to = "attributes"
+      timestamp = {
+        parse_from = "attributes.createdAt"
+        layout_type = "layout"
+        layout = "2006-01-02T15:04:05Z"
+      }
+    },
+    {
+      type = "metric_generator"
+      metric_name = "workflow.duration"
+      metric_type = "gauge"
+      metric_value = "attributes.duration"
+      metric_unit = "s"
+      metric_description = "Total workflow execution time from GitHub Actions API"
+      attributes = {
+        "workflow.name" = "EXPR(attributes.workflowName)",
+        "workflow.id" = "EXPR(attributes.workflowDatabaseId)",
+        "run.id" = "EXPR(attributes.databaseId)",
+        "run.number" = "EXPR(attributes.number)",
+        "run.attempt" = "EXPR(attributes.attempt)",
+        "run.conclusion" = "EXPR(attributes.conclusion)",
+        "run.status" = "EXPR(attributes.status)",
+        "run.event" = "EXPR(attributes.event)",
+        "run.branch" = "EXPR(attributes.headBranch)",
+        "run.sha" = "EXPR(attributes.headSha)",
+        "metric.source" = "json"
+      }
+    },
+    {
+      type = "metric_generator"
+      metric_name = "workflow.job.duration"
+      metric_type = "gauge"
+      metric_value = "EXPR(attributes.jobs[].duration)"
+      metric_unit = "s"
+      metric_description = "Job execution time from GitHub Actions API"
+      attributes = {
+        "workflow.name" = "EXPR(attributes.workflowName)",
+        "workflow.id" = "EXPR(attributes.workflowDatabaseId)",
+        "run.id" = "EXPR(attributes.databaseId)",
+        "run.number" = "EXPR(attributes.number)",
+        "run.attempt" = "EXPR(attributes.attempt)",
+        "run.conclusion" = "EXPR(attributes.conclusion)",
+        "run.status" = "EXPR(attributes.status)",
+        "run.event" = "EXPR(attributes.event)",
+        "run.branch" = "EXPR(attributes.headBranch)",
+        "run.sha" = "EXPR(attributes.headSha)",
+        "job.name" = "EXPR(attributes.jobs[].name)",
+        "job.id" = "EXPR(attributes.jobs[].databaseId)",
+        "job.status" = "EXPR(attributes.jobs[].status)",
+        "job.conclusion" = "EXPR(attributes.jobs[].conclusion)",
+        "metric.source" = "json"
+      }
+    },
+    {
+      type = "metric_generator"
+      metric_name = "workflow.step.duration"
+      metric_type = "gauge"
+      metric_value = "EXPR(attributes.jobs[].steps[].duration)"
+      metric_unit = "s"
+      metric_description = "Step execution time from GitHub Actions API"
+      attributes = {
+        "workflow.name" = "EXPR(attributes.workflowName)",
+        "workflow.id" = "EXPR(attributes.workflowDatabaseId)",
+        "run.id" = "EXPR(attributes.databaseId)",
+        "run.number" = "EXPR(attributes.number)",
+        "run.attempt" = "EXPR(attributes.attempt)",
+        "run.conclusion" = "EXPR(attributes.conclusion)",
+        "run.status" = "EXPR(attributes.status)",
+        "run.event" = "EXPR(attributes.event)",
+        "run.branch" = "EXPR(attributes.headBranch)",
+        "run.sha" = "EXPR(attributes.headSha)",
+        "job.name" = "EXPR(attributes.jobs[].name)",
+        "job.id" = "EXPR(attributes.jobs[].databaseId)",
+        "job.status" = "EXPR(attributes.jobs[].status)",
+        "job.conclusion" = "EXPR(attributes.jobs[].conclusion)",
+        "step.name" = "EXPR(attributes.jobs[].steps[].name)",
+        "step.number" = "EXPR(attributes.jobs[].steps[].number)",
+        "step.status" = "EXPR(attributes.jobs[].steps[].status)",
+        "step.conclusion" = "EXPR(attributes.jobs[].steps[].conclusion)",
+        "metric.source" = "json"
+      }
+    }
+  ]
+
+  output {
+    metrics = otelcol.processor.batch.github_actions.input
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// PROCESSORS
+/////////////////////////////////////////////////////////////
+
+// Batch processor for better performance
+otelcol.processor.batch "github_actions" {
+  timeout = "1s"
+  send_batch_size = 1024
+
+  output {
+    logs = otelcol.processor.transform.github_actions.input
+    metrics = otelcol.processor.transform.github_actions.input
+  }
+}
+
+// Transform processor to standardize attributes
+otelcol.processor.transform "github_actions" {
+  error_mode = "ignore"
+  
+  logs_statements {
+    context = "log"
+    statements = [
+      // Ensure consistent attribute naming
+      "set(attributes[\"workflow.job.name\"], attributes[\"job_name\"]) where attributes[\"job_name\"] != nil",
+      "set(attributes[\"workflow.step.name\"], attributes[\"step_name\"]) where attributes[\"step_name\"] != nil",
+      "set(attributes[\"workflow.job.id\"], attributes[\"job_id\"]) where attributes[\"job_id\"] != nil",
+      "set(attributes[\"workflow.step.id\"], attributes[\"step_id\"]) where attributes[\"step_id\"] != nil",
+      // Add metric source
+      "set(attributes[\"metric.source\"], \"logs\")",
+      // Clean up temporary attributes
+      "delete_key(attributes, \"job_name\")",
+      "delete_key(attributes, \"step_name\")",
+      "delete_key(attributes, \"job_id\")",
+      "delete_key(attributes, \"step_id\")",
+      "delete_key(attributes, \"timestamp\")"
+    ]
+  }
+
+  output {
+    logs = otelcol.exporter.otlphttp.destination.input
+    metrics = otelcol.exporter.otlphttp.destination.input
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// CONNECTORS
+/////////////////////////////////////////////////////////////
+
+// Extract metrics from logs
+otelcol.connector.spanmetrics "github_actions" {
+  metrics_flush_interval = "15s"
+  dimensions = [
+    "workflow.name",
+    "workflow.job.name",
+    "workflow.step.name",
+    "run.status",
+    "run.conclusion",
+    "metric.source"
+  ]
+  
+  histogram {
+    unit = "s"
+    max_size = 100
+  }
+
+  output {
+    logs = loki.process.github_actions.input
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// EXPORTERS
+/////////////////////////////////////////////////////////////
+
+// Process logs for Loki
+loki.process "github_actions" {
+  forward_to = [loki.write.github_actions.receiver]
+  
+  // Extract labels for better querying
+  stage.json {
+    expressions = {
+      workflow_name = "workflow.name"
+      job_name = "workflow.job.name"
+      step_name = "workflow.step.name"
+      run_id = "workflow.run_id"
+      status = "run.status"
+      conclusion = "run.conclusion"
+      metric_source = "metric.source"
+    }
+  }
+
+  // Add static labels
+  stage.static_labels {
+    values = {
+      job = "github_actions"
+      source = "github_actions"
+    }
+  }
+
+  // Add dynamic labels
+  stage.labels {
+    values = {
+      workflow = "workflow.name"
+      job = "workflow.job.name"
+      step = "workflow.step.name"
+      run_id = "workflow.run_id"
+      status = "run.status"
+      conclusion = "run.conclusion"
+      metric_source = "metric.source"
+    }
+  }
+}
+
+// Send logs to Loki
+loki.write "github_actions" {
+  endpoint {
+    url = telemetry_endpoint
+  }
+  
+  external_labels = {
+    source = "github_actions"
+    environment = env("ENVIRONMENT") || "production"
+  }
+}
+
+// Common exporter configuration
+otelcol.exporter.otlphttp "destination" {
+  client {
+    endpoint = telemetry_endpoint
+    auth = otelcol.auth.basic.destination.handler
+  }
+}
+
+otelcol.auth.basic "destination" {
+  username = env("TELEMETRY_USERNAME")
+  password = env("TELEMETRY_PASSWORD")
+} 
