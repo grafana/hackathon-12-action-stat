@@ -15,17 +15,17 @@ export GITHUB_REPOSITORY=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 export WORKFLOW_ID=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowDatabaseId -q .workflowDatabaseId)
 export WORKFLOW_NAME=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowName -q .workflowName)
 
-if [ -z "${TELEMETRY_URL:-}" ]; then
+if [[ -z "${TELEMETRY_URL:-}" ]]; then
   echo "TELEMETRY_URL is not set!"
   exit 1
 fi
 
-if [ -z "${TELEMETRY_USERNAME:-}" ]; then
+if [[ -z "${TELEMETRY_USERNAME:-}" ]]; then
   echo "TELEMETRY_USERNAME is not set!"
   exit 1
 fi
 
-if [ -z "${TELEMETRY_PASSWORD:-}" ]; then
+if [[ -z "${TELEMETRY_PASSWORD:-}" ]]; then
   echo "TELEMETRY_PASSWORD is not set!"
   exit 1
 fi
@@ -51,7 +51,7 @@ while true; do
   fi
 
   # Check if log directory is empty
-  if [[ -z "$(ls -A "${LOGS_DIRECTORY}")" ]]; then
+  if [[ -z "$(ls -A "${LOGS_DIRECTORY}" || true)" ]]; then
     kill "${ALLOY_PID}" || true
     break
   fi
