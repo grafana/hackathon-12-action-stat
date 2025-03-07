@@ -191,7 +191,7 @@ otelcol.processor.batch "github_actions" {
 otelcol.processor.transform "github_actions" {
   error_mode = "ignore"
   
-  logs_statements {
+  log_statements {
     context = "log"
     statements = [
       // Ensure consistent attribute naming
