@@ -217,12 +217,12 @@ otelcol.connector.spanmetrics "metrics_from_logs" {
   namespace = "github.actions"
   
   dimensions = {
-    name = "workflow.name"
-    name = "workflow.job.name"
-    name = "workflow.step.name"
-    name = "run.status"
-    name = "run.conclusion"
-    name = "metric.source"
+    name = "workflow.name",
+    name = "workflow.job.name",
+    name = "workflow.step.name",
+    name = "run.status",
+    name = "run.conclusion",
+    name = "metric.source",
   }
   
   histogram {
