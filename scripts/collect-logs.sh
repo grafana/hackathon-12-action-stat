@@ -43,7 +43,10 @@ function main() {
   echo "Processing workflow: ${WORKFLOW_NAME} in ${GITHUB_REPOSITORY}"
 
   # Get the count of jobs
-  JOBS_COUNT=$(echo "${JOBS_JSON}" | jq 'length')
+  if ! JOBS_COUNT=$(echo "${JOBS_JSON}" | jq 'length'); then
+      echo -e "\033[31mError: Failed to count jobs from JSON\033[0m"
+      exit 1
+  fi
   
   if [[ "${JOBS_COUNT}" -eq 0 ]]; then
       echo "No jobs found in workflow run"
@@ -54,8 +57,14 @@ function main() {
   JOB_INDEX=0
   while [[ "${JOB_INDEX}" -lt "${JOBS_COUNT}" ]]; do
     # Extract single JSON-formatted job using index
-    JOB_ID=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" -r '.[$i | tonumber].databaseId')
-    JOB_NAME=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" -r '.[$i | tonumber].name')
+    if ! JOB_ID=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" -r '.[$i | tonumber].databaseId'); then
+        echo -e "\033[31mError: Failed to extract job ID for index ${JOB_INDEX}\033[0m"
+        exit 1
+    fi
+    if ! JOB_NAME=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" -r '.[$i | tonumber].name'); then
+        echo -e "\033[31mError: Failed to extract job name for index ${JOB_INDEX}\033[0m"
+        exit 1
+    fi
     
     if [[ -z "${JOB_ID}" || "${JOB_ID}" == "null" || -z "${JOB_NAME}" || "${JOB_NAME}" == "null" ]]; then
         echo -e "\033[33mWarning:Invalid job data received for jobs index ${JOB_INDEX}.\033[0m"
@@ -73,12 +82,21 @@ function main() {
     echo "Processing job steps..."
     
     # Loop through each step in the job
-    STEPS_COUNT=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" -r '.[$i | tonumber].steps | length')
+    if ! STEPS_COUNT=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" -r '.[$i | tonumber].steps | length'); then
+        echo -e "\033[31mError: Failed to count steps for job ${JOB_NAME}\033[0m"
+        exit 1
+    fi
     STEP_INDEX=0
 
     while [[ "${STEP_INDEX}" -lt "${STEPS_COUNT}" ]]; do
-      STEP_NAME=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" --arg j "${STEP_INDEX}" -r '.[$i | tonumber].steps[$j | tonumber].name')
-      STEP_NUMBER=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" --arg j "${STEP_INDEX}" -r '.[$i | tonumber].steps[$j | tonumber].number')
+      if ! STEP_NAME=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" --arg j "${STEP_INDEX}" -r '.[$i | tonumber].steps[$j | tonumber].name'); then
+          echo -e "\033[31mError: Failed to extract step name for job ${JOB_NAME}, step index ${STEP_INDEX}\033[0m"
+          exit 1
+      fi
+      if ! STEP_NUMBER=$(echo "${JOBS_JSON}" | jq --arg i "${JOB_INDEX}" --arg j "${STEP_INDEX}" -r '.[$i | tonumber].steps[$j | tonumber].number'); then
+          echo -e "\033[31mError: Failed to extract step number for job ${JOB_NAME}, step index ${STEP_INDEX}\033[0m"
+          exit 1
+      fi
 
       echo "Processing job $((JOB_INDEX + 1)) - step $((STEP_INDEX + 1)) of ${STEPS_COUNT}: ${STEP_NAME}"
 
