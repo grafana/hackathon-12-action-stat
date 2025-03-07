@@ -39,7 +39,7 @@ otelcol.receiver.filelog "github_actions_logs" {
     "workflow.name" = env("WORKFLOW_NAME"),
     "workflow.run_id" = env("WORKFLOW_RUN_ID"),
     "source" = "github_actions",
-    "metric.source" = "logs"
+    "metric.source" = "logs",
   }
 
   operators = [
@@ -48,14 +48,14 @@ otelcol.receiver.filelog "github_actions_logs" {
       type = "regex_parser",
       parse_from = "attributes[\"log.file.name\"]",
       regex = "^job-(?P<job_id>[0-9]+)-step-(?P<step_id>[0-9]+)\\.log$",
-      on_error = "drop"
+      on_error = "drop",
     },
     // Parse log line format
     {
       type = "regex_parser",
       parse_from = "body",
       regex = "^(?P<job_name>[^\\t]+)\\t(?P<step_name>[^\\t]+)\\t(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{7}Z).*$",
-      on_error = "drop"
+      on_error = "drop",
     },
     // Parse timestamp
     {
@@ -63,8 +63,8 @@ otelcol.receiver.filelog "github_actions_logs" {
       parse_from = "attributes.timestamp",
       layout_type = "strptime",
       layout = "%Y-%m-%dT%H:%M:%S.%fZ",
-      on_error = "drop"
-    }
+      on_error = "drop",
+    },
   ]
 
   output {
@@ -74,8 +74,8 @@ otelcol.receiver.filelog "github_actions_logs" {
 
 // File log receiver for workflow metrics
 otelcol.receiver.filelog "workflow_metrics" {
-  include = [gha_metrics_path],
-  start_at = "beginning",
+  include = [gha_metrics_path]
+  start_at = "beginning"
   delete_after_read = true
   
   resource = {
@@ -84,7 +84,7 @@ otelcol.receiver.filelog "workflow_metrics" {
     "workflow.name" = env("WORKFLOW_NAME"),
     "workflow.run_id" = env("WORKFLOW_RUN_ID"),
     "source" = "github_actions",
-    "metric.source" = "json"
+    "metric.source" = "json",
   }
 
   operators = [
@@ -94,8 +94,8 @@ otelcol.receiver.filelog "workflow_metrics" {
       timestamp = {
         parse_from = "attributes.createdAt",
         layout_type = "layout",
-        layout = "2006-01-02T15:04:05Z"
-      }
+        layout = "2006-01-02T15:04:05Z",
+      },
     },
     {
       type = "metric_generator",
@@ -115,8 +115,8 @@ otelcol.receiver.filelog "workflow_metrics" {
         "run.event" = "EXPR(attributes.event)",
         "run.branch" = "EXPR(attributes.headBranch)",
         "run.sha" = "EXPR(attributes.headSha)",
-        "metric.source" = "json"
-      }
+        "metric.source" = "json",
+      },
     },
     {
       type = "metric_generator",
@@ -140,8 +140,8 @@ otelcol.receiver.filelog "workflow_metrics" {
         "job.id" = "EXPR(attributes.jobs[].databaseId)",
         "job.status" = "EXPR(attributes.jobs[].status)",
         "job.conclusion" = "EXPR(attributes.jobs[].conclusion)",
-        "metric.source" = "json"
-      }
+        "metric.source" = "json",
+      },
     },
     {
       type = "metric_generator",
@@ -169,9 +169,9 @@ otelcol.receiver.filelog "workflow_metrics" {
         "step.number" = "EXPR(attributes.jobs[].steps[].number)",
         "step.status" = "EXPR(attributes.jobs[].steps[].status)",
         "step.conclusion" = "EXPR(attributes.jobs[].steps[].conclusion)",
-        "metric.source" = "json"
-      }
-    }
+        "metric.source" = "json",
+      },
+    },
   ]
 
   output {
@@ -185,8 +185,8 @@ otelcol.receiver.filelog "workflow_metrics" {
 
 // Batch processor for better performance
 otelcol.processor.batch "github_actions" {
-  timeout = "1s",
-  send_batch_size = 1024,
+  timeout = "1s"
+  send_batch_size = 1024
 
   output {
     logs = otelcol.processor.transform.github_actions.input,
@@ -199,7 +199,7 @@ otelcol.processor.transform "github_actions" {
   error_mode = "ignore"
   
   logs_statements {
-    context = "log",
+    context = "log"
     statements = [
       // Ensure consistent attribute naming
       "set(attributes[\"workflow.job.name\"], attributes[\"job_name\"]) where attributes[\"job_name\"] != nil",
@@ -218,7 +218,7 @@ otelcol.processor.transform "github_actions" {
   }
 
   output {
-    logs = otelcol.exporter.otlphttp.destination.input,
+    logs = otelcol.exporter.otlphttp.destination.input
     metrics = otelcol.exporter.otlphttp.destination.input
   }
 }
@@ -229,7 +229,7 @@ otelcol.processor.transform "github_actions" {
 
 // Extract metrics from logs
 otelcol.connector.spanmetrics "github_actions" {
-  metrics_flush_interval = "15s",
+  metrics_flush_interval = "15s"
   dimensions = [
     "workflow.name",
     "workflow.job.name",
@@ -240,7 +240,7 @@ otelcol.connector.spanmetrics "github_actions" {
   ]
   
   histogram {
-    unit = "s",
+    unit = "s"
     max_size = 100
   }
 
@@ -266,7 +266,7 @@ loki.process "github_actions" {
       run_id = "workflow.run_id",
       status = "run.status",
       conclusion = "run.conclusion",
-      metric_source = "metric.source"
+      metric_source = "metric.source",
     }
   }
 
@@ -274,7 +274,7 @@ loki.process "github_actions" {
   stage.static_labels {
     values = {
       job = "github_actions",
-      source = "github_actions"
+      source = "github_actions",
     }
   }
 
@@ -287,7 +287,7 @@ loki.process "github_actions" {
       run_id = "workflow.run_id",
       status = "run.status",
       conclusion = "run.conclusion",
-      metric_source = "metric.source"
+      metric_source = "metric.source",
     }
   }
 }
@@ -300,7 +300,7 @@ loki.write "github_actions" {
   
   external_labels = {
     source = "github_actions",
-    environment = env("ENVIRONMENT") || "production"
+    environment = env("ENVIRONMENT") || "production",
   }
 }
 
@@ -313,6 +313,6 @@ otelcol.exporter.otlphttp "destination" {
 }
 
 otelcol.auth.basic "destination" {
-  username = env("TELEMETRY_USERNAME"),
+  username = env("TELEMETRY_USERNAME")
   password = env("TELEMETRY_PASSWORD")
 } 
