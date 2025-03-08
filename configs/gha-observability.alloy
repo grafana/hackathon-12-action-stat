@@ -281,14 +281,13 @@ otelcol.processor.transform "github_actions_transform" {
       "set(metric.name, \"workflow.conclusion\")",
       "set(metric.name, \"workflow.job.status\")",
       "set(metric.name, \"workflow.step.status\")",
-      "set(metric.gauge.value, metric.attributes[\"duration\"])",
-      "set(metric.gauge.value, metric.attributes[\"workflow.status\"])",
-      "set(metric.gauge.value, metric.attributes[\"workflow.conclusion\"])",
-      "set(metric.gauge.value, metric.attributes[\"workflow.job.status\"])",
-      "set(metric.gauge.value, metric.attributes[\"workflow.step.status\"])",
+      "set(datapoint.value, metric.attributes[\"duration\"])",
+      "set(datapoint.value, metric.attributes[\"workflow.status\"])",
+      "set(datapoint.value, metric.attributes[\"workflow.conclusion\"])",
+      "set(datapoint.value, metric.attributes[\"workflow.job.status\"])",
+      "set(datapoint.value, metric.attributes[\"workflow.step.status\"])",
       "set(metric.unit, \"s\")",
-      "set(metric.attributes[\"workflow.name\"], metric.attributes[\"workflow.name\"])",
-      "set(metric.attributes[\"workflow.run_id\"], metric.attributes[\"workflow.run_id\"])",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\"])",
     ]
   }
 
