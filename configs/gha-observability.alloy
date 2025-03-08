@@ -274,22 +274,20 @@ otelcol.processor.transform "github_actions_transform" {
   metric_statements {
     context = "datapoint"
     statements = [
-      "set(metric.name, \"workflow.duration\")",
-      "set(metric.name, \"workflow.job.duration\")",
-      "set(metric.name, \"workflow.step.duration\")",
-      "set(metric.name, \"workflow.status\")",
-      "set(metric.name, \"workflow.conclusion\")",
-      "set(metric.name, \"workflow.job.status\")",
-      "set(metric.name, \"workflow.step.status\")",
-      "set(metric.value, metric.attributes[\"duration\"])",
-      "set(metric.value, metric.attributes[\"workflow.status\"])",
-      "set(metric.value, metric.attributes[\"workflow.conclusion\"])",
-      "set(metric.value, metric.attributes[\"workflow.job.status\"])",
-      "set(metric.value, metric.attributes[\"workflow.step.status\"])",
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\"])",
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\"])",
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\"])",
-      "set(metric.unit, \"s\")",
+      "set(name, \"workflow.duration\")",
+      "set(name, \"workflow.job.duration\")",
+      "set(name, \"workflow.step.duration\")",
+      "set(name, \"workflow.status\")",
+      "set(name, \"workflow.conclusion\")",
+      "set(name, \"workflow.job.status\")",
+      "set(name, \"workflow.step.status\")",
+      "set(value.double, attributes[\"duration\"])",
+      "set(value.int, attributes[\"workflow.status\"])",
+      "set(value.int, attributes[\"workflow.conclusion\"])",
+      "set(value.int, attributes[\"workflow.job.status\"])",
+      "set(value.int, attributes[\"workflow.step.status\"])",
+      "set(unit, \"s\")",
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\"])"
     ]
   }
 
