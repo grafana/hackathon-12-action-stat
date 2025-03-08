@@ -49,9 +49,9 @@ otelcol.receiver.filelog "github_actions_logs" {
         layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       },
       output = [
-        "attributes.job_id",
-        "attributes.step_number",
-        "attributes.log.file.name",
+        "job_id",
+        "step_number",
+        "log.file.name",
       ],
     },
     // Parse log line format with enhanced error handling and validation
@@ -61,9 +61,9 @@ otelcol.receiver.filelog "github_actions_logs" {
       regex = "^(?:(?P<job_name>[^\\t]*?)\\t(?P<step_name>[^\\t]*?)\\t)?(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+Z).*$",
       on_error = "drop",
       output = [
-        "attributes.job_name",
-        "attributes.step_name",
-        "attributes.timestamp",
+        "job_name",
+        "step_name",
+        "timestamp",
         "body",
       ],
     },
@@ -75,7 +75,7 @@ otelcol.receiver.filelog "github_actions_logs" {
       layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       on_error = "drop",
       output = [
-        "attributes.timestamp",
+        "timestamp",
       ],
     },
   ]
@@ -197,7 +197,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes.workflow.job.name",
       on_error = "drop",
       output = [
-        "jobs[\"*\"].name",
+        "name",
         "workflow.job.name",
       ],
     },
@@ -207,7 +207,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes.workflow.job.status",
       on_error = "drop",
       output = [
-        "jobs[\"*\"].status",
+        "status",
         "workflow.job.status",
       ],
     },
@@ -217,7 +217,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes.workflow.job.duration",
       on_error = "drop",
       output = [
-        "jobs[\"*\"].duration",
+        "duration",
         "workflow.job.duration",
       ],
     },
@@ -228,7 +228,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes.workflow.step.name",
       on_error = "drop",
       output = [
-        "jobs[\"*\"].steps[\"*\"].name",
+        "name",
         "workflow.step.name",
       ],
     },
@@ -238,7 +238,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes.workflow.step.status",
       on_error = "drop",
       output = [
-        "jobs[\"*\"].steps[\"*\"].status",
+        "status",
         "workflow.step.status",
       ],
     },
@@ -248,7 +248,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes.workflow.step.duration",
       on_error = "drop",
       output = [
-        "jobs[\"*\"].steps[\"*\"].duration",
+        "duration",
         "workflow.step.duration",
       ],
     },
@@ -281,19 +281,19 @@ otelcol.processor.transform "github_actions_transform" {
     context = "log"
     statements = [
       "set(log.attributes[\"validation.state\"], \"checking_resource_attributes\")",
-      "set(log.attributes[\"error\"], \"missing_workflow_name\") where resource.attributes[\"workflow.name\"] == nil",
-      "set(log.attributes[\"error\"], \"missing_workflow_run_id\") where log.attributes[\"error\"] == nil and resource.attributes[\"workflow.run_id\"] == nil",
+      "set(log.attributes[\"error\"], \"missing_workflow_name\") where (resource.attributes[\"workflow.name\"] == nil)",
+      "set(log.attributes[\"error\"], \"missing_workflow_run_id\") where ((log.attributes[\"error\"] == nil) and (resource.attributes[\"workflow.run_id\"] == nil))",
       
       "set(log.attributes[\"validation.state\"], \"checking_input_attributes\")",
-      "set(log.attributes[\"error\"], \"missing_required_attributes\") where log.attributes[\"error\"] == nil and (log.attributes[\"timestamp.valid\"] == nil or log.attributes[\"parsed_timestamp\"] == nil)",
+      "set(log.attributes[\"error\"], \"missing_required_attributes\") where ((log.attributes[\"error\"] == nil) and ((log.attributes[\"timestamp.valid\"] == nil) or (log.attributes[\"parsed_timestamp\"] == nil)))",
       
       "set(log.attributes[\"validation.state\"], \"normalizing_fields\")",
-      "set(log.attributes[\"error\"], \"invalid_job_name\") where log.attributes[\"job.name\"] != nil and IsString(log.attributes[\"job.name\"]) == false",
-      "set(log.attributes[\"error\"], \"invalid_step_name\") where log.attributes[\"step.name\"] != nil and IsString(log.attributes[\"step.name\"]) == false",
-      "set(log.attributes[\"workflow.job.name\"], log.attributes[\"job.name\"]) where log.attributes[\"error\"] == nil and log.attributes[\"job.name\"] != nil",
-      "set(log.attributes[\"workflow.job.id\"], log.attributes[\"job.id\"]) where log.attributes[\"error\"] == nil and log.attributes[\"job.id\"] != nil",
-      "set(log.attributes[\"workflow.step.name\"], log.attributes[\"step.name\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.name\"] != nil and log.attributes[\"step.name\"] != \"\"",
-      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.number\"] != nil and log.attributes[\"step.number\"] != \"\"",
+      "set(log.attributes[\"error\"], \"invalid_job_name\") where ((log.attributes[\"job.name\"] != nil) and (IsString(log.attributes[\"job.name\"]) == false))",
+      "set(log.attributes[\"error\"], \"invalid_step_name\") where ((log.attributes[\"step.name\"] != nil) and (IsString(log.attributes[\"step.name\"]) == false))",
+      "set(log.attributes[\"workflow.job.name\"], log.attributes[\"job.name\"]) where ((log.attributes[\"error\"] == nil) and (log.attributes[\"job.name\"] != nil))",
+      "set(log.attributes[\"workflow.job.id\"], log.attributes[\"job.id\"]) where ((log.attributes[\"error\"] == nil) and (log.attributes[\"job.id\"] != nil))",
+      "set(log.attributes[\"workflow.step.name\"], log.attributes[\"step.name\"]) where ((log.attributes[\"error\"] == nil) and (log.attributes[\"step.name\"] != nil) and (log.attributes[\"step.name\"] != \"\"))",
+      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"]) where ((log.attributes[\"error\"] == nil) and (log.attributes[\"step.number\"] != nil) and (log.attributes[\"step.number\"] != \"\"))",
     ]
   }
 
