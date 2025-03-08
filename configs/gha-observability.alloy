@@ -287,7 +287,7 @@ otelcol.processor.transform "github_actions_transform" {
       "set(data_point[0].value, attributes[\"workflow.job.status\"])",
       "set(data_point[0].value, attributes[\"workflow.step.status\"])",
       "set(unit, \"s\")",
-      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\"])"
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\"])",
     ]
   }
 
