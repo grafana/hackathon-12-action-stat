@@ -43,11 +43,11 @@ otelcol.receiver.filelog "github_actions_logs" {
       regex = "^job-(?P<job_id>[0-9]+)(?:-step-(?P<step_number>[0-9]+))?\\.log$",
       on_error = "drop",
     },
-    // Parse log line format
+    // Parse log line format - more lenient regex
     {
       type = "regex_parser",
       parse_from = "body",
-      regex = "^(?:(?P<job_name>[^\\t]+)\\t(?P<step_name>[^\\t]+)\\t)?(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+Z).*$",
+      regex = "^(?:(?P<job_name>[^\\t]*?)\\t(?P<step_name>[^\\t]*?)\\t)?(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+Z).*$",
       on_error = "drop",
     },
     // Parse timestamp
@@ -191,22 +191,59 @@ otelcol.processor.transform "github_actions_transform" {
       // Only set step fields if they exist
       "set(attributes[\"workflow.step.name\"], attributes[\"step_name\"]) where attributes[\"step_name\"] != nil and attributes[\"step_name\"] != \"\"",
       "set(attributes[\"workflow.step.id\"], attributes[\"step_number\"]) where attributes[\"step_number\"] != nil and attributes[\"step_number\"] != \"\"",
-      // Track timestamps for duration calculation
-      "set(attributes[\"start_time\"], attributes[\"timestamp\"]) where IsMatch(body, \"started\")",
-      "set(attributes[\"end_time\"], attributes[\"timestamp\"]) where IsMatch(body, \"completed\")",
+      // Track timestamps for duration calculation - more comprehensive matching
+      // Start timestamps - ordered by precedence
+      "set(attributes[\"started_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"initialized workflow\")",
+      "set(attributes[\"started_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"initialized job\")",
+      "set(attributes[\"started_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"initialized step\")",
+      "set(attributes[\"started_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"starting\")",
+      "set(attributes[\"started_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"run job\")",
+      "set(attributes[\"started_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"begin\")",
+      // Completion timestamps - ordered by precedence
+      "set(attributes[\"completed_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"workflow complete\")",
+      "set(attributes[\"completed_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"job complete\")",
+      "set(attributes[\"completed_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"step complete\")",
+      "set(attributes[\"completed_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"completed\")",
+      "set(attributes[\"completed_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"done\")",
+      "set(attributes[\"completed_at\"], attributes[\"timestamp\"]) where contains(lowercase(body), \"finish\")",
       // Add metric source
       "set(attributes[\"metric.source\"], \"logs\")",
-      // Calculate durations when we have both timestamps
-      "set(attributes[\"duration\"], ConvertTime(attributes[\"end_time\"]) - ConvertTime(attributes[\"start_time\"])) where attributes[\"start_time\"] != nil and attributes[\"end_time\"] != nil",
-      // Map status values
-      "set(attributes[\"status_value\"], 1) where IsMatch(body, \"completed successfully\")",
-      "set(attributes[\"status_value\"], 0) where IsMatch(body, \"failed\")",
+      // Calculate durations for completed jobs/steps (ensure positive duration)
+      "set(attributes[\"duration\"], max(0, time_diff_nano(attributes[\"started_at\"], attributes[\"completed_at\"]))) where attributes[\"started_at\"] != nil and attributes[\"completed_at\"] != nil",
+      // Calculate durations for running jobs/steps (using current time)
+      "set(attributes[\"duration\"], max(0, time_diff_nano(attributes[\"started_at\"], now()))) where attributes[\"started_at\"] != nil and attributes[\"completed_at\"] == nil",
+      // Map status values (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)
+      // Terminal states (these take precedence)
+      "set(attributes[\"status_value\"], 1) where contains(lowercase(body), \"completed successfully\")",
+      "set(attributes[\"status_value\"], 0) where contains(lowercase(body), \"failed with exit code\")",
+      "set(attributes[\"status_value\"], 0) where contains(lowercase(body), \"failure\")",
+      "set(attributes[\"status_value\"], 3) where contains(lowercase(body), \"cancelled\")",
+      "set(attributes[\"status_value\"], 3) where contains(lowercase(body), \"canceled\")",
+      "set(attributes[\"status_value\"], 4) where contains(lowercase(body), \"skipped\")",
+      // Non-terminal states (lower precedence)
+      "set(attributes[\"status_value\"], 2) where attributes[\"status_value\"] == nil and contains(lowercase(body), \"in progress\")",
+      "set(attributes[\"status_value\"], 2) where attributes[\"status_value\"] == nil and contains(lowercase(body), \"running\")",
+      "set(attributes[\"status_value\"], 2) where attributes[\"status_value\"] == nil and contains(lowercase(body), \"queued\")",
+      "set(attributes[\"status_value\"], 2) where attributes[\"status_value\"] == nil and attributes[\"started_at\"] != nil and attributes[\"completed_at\"] == nil",
+      // Generic states (lowest precedence)
+      "set(attributes[\"status_value\"], 1) where attributes[\"status_value\"] == nil and contains(lowercase(body), \"success\")",
+      "set(attributes[\"status_value\"], 0) where attributes[\"status_value\"] == nil and contains(lowercase(body), \"error\")",
+      "set(attributes[\"status_value\"], 4) where attributes[\"status_value\"] == nil and contains(lowercase(body), \"disabled\")",
+      // Ensure status values are set for workflow/job/step status attributes with proper scoping
+      "set(attributes[\"workflow.status\"], coalesce(attributes[\"workflow.status\"], attributes[\"status_value\"])) where attributes[\"status_value\"] != nil and attributes[\"workflow.name\"] != nil",
+      "set(attributes[\"workflow.job.status\"], coalesce(attributes[\"workflow.job.status\"], attributes[\"status_value\"])) where attributes[\"status_value\"] != nil and attributes[\"workflow.job.name\"] != nil",
+      "set(attributes[\"workflow.step.status\"], coalesce(attributes[\"workflow.step.status\"], attributes[\"status_value\"])) where attributes[\"status_value\"] != nil and attributes[\"workflow.step.name\"] != nil",
       // Clean up temporary attributes
       "delete_key(attributes, \"job_name\")",
       "delete_key(attributes, \"step_name\") where attributes[\"step_name\"] != nil",
       "delete_key(attributes, \"job_id\")",
       "delete_key(attributes, \"step_number\") where attributes[\"step_number\"] != nil",
       "delete_key(attributes, \"timestamp\")",
+      // Only clean up timestamps if we've calculated a duration
+      "delete_key(attributes, \"started_at\") where attributes[\"duration\"] != nil",
+      "delete_key(attributes, \"completed_at\") where attributes[\"duration\"] != nil",
+      // Clean up status value after propagation
+      "delete_key(attributes, \"status_value\") where attributes[\"workflow.status\"] != nil or attributes[\"workflow.job.status\"] != nil or attributes[\"workflow.step.status\"] != nil",
     ]
   }
 
@@ -215,30 +252,30 @@ otelcol.processor.transform "github_actions_transform" {
     statements = [
       // Duration metrics (convert from nano to seconds)
       "set(metric.name, \"workflow.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.name\"] != nil",
-      "set(metric.value, attributes[\"duration\"] / 1000000000) where metric.name == \"workflow.duration\"",
+      "set(metric.value, divide(attributes[\"duration\"], 1000000000)) where metric.name == \"workflow.duration\"",
       "set(metric.name, \"workflow.job.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.job.name\"] != nil",
-      "set(metric.value, attributes[\"duration\"] / 1000000000) where metric.name == \"workflow.job.duration\"",
+      "set(metric.value, divide(attributes[\"duration\"], 1000000000)) where metric.name == \"workflow.job.duration\"",
       "set(metric.name, \"workflow.step.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.step.name\"] != nil",
-      "set(metric.value, attributes[\"duration\"] / 1000000000) where metric.name == \"workflow.step.duration\"",
-      // Status metrics
+      "set(metric.value, divide(attributes[\"duration\"], 1000000000)) where metric.name == \"workflow.step.duration\"",
+      // Status metrics with proper attribute checks
       "set(metric.name, \"workflow.status\") where attributes[\"workflow.status\"] != nil",
-      "set(metric.value, attributes[\"status_value\"]) where metric.name == \"workflow.status\"",
+      "set(metric.value, attributes[\"workflow.status\"]) where metric.name == \"workflow.status\"",
       "set(metric.name, \"workflow.conclusion\") where attributes[\"workflow.conclusion\"] != nil",
-      "set(metric.value, attributes[\"status_value\"]) where metric.name == \"workflow.conclusion\"",
+      "set(metric.value, attributes[\"workflow.conclusion\"]) where metric.name == \"workflow.conclusion\"",
       "set(metric.name, \"workflow.job.status\") where attributes[\"workflow.job.status\"] != nil",
-      "set(metric.value, attributes[\"status_value\"]) where metric.name == \"workflow.job.status\"",
+      "set(metric.value, attributes[\"workflow.job.status\"]) where metric.name == \"workflow.job.status\"",
       "set(metric.name, \"workflow.step.status\") where attributes[\"workflow.step.status\"] != nil",
-      "set(metric.value, attributes[\"status_value\"]) where metric.name == \"workflow.step.status\"",
+      "set(metric.value, attributes[\"workflow.step.status\"]) where metric.name == \"workflow.step.status\"",
       // Set units for duration metrics
       "set(metric.unit, \"s\") where contains(metric.name, \"duration\")",
-      // Set descriptions
-      "set(metric.description, \"Duration of workflow execution\") where metric.name == \"workflow.duration\"",
-      "set(metric.description, \"Duration of job execution\") where metric.name == \"workflow.job.duration\"",
-      "set(metric.description, \"Duration of step execution\") where metric.name == \"workflow.step.duration\"",
-      "set(metric.description, \"Current workflow status (1=success, 0=failure)\") where metric.name == \"workflow.status\"",
-      "set(metric.description, \"Workflow conclusion (1=success, 0=failure)\") where metric.name == \"workflow.conclusion\"",
-      "set(metric.description, \"Current job status (1=success, 0=failure)\") where metric.name == \"workflow.job.status\"",
-      "set(metric.description, \"Current step status (1=success, 0=failure)\") where metric.name == \"workflow.step.status\"",
+      // Set descriptions with proper status value documentation
+      "set(metric.description, \"Duration of workflow execution in seconds\") where metric.name == \"workflow.duration\"",
+      "set(metric.description, \"Duration of job execution in seconds\") where metric.name == \"workflow.job.duration\"",
+      "set(metric.description, \"Duration of step execution in seconds\") where metric.name == \"workflow.step.duration\"",
+      "set(metric.description, \"Current workflow status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.status\"",
+      "set(metric.description, \"Workflow conclusion (0=failed, 1=success, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.conclusion\"",
+      "set(metric.description, \"Current job status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.job.status\"",
+      "set(metric.description, \"Current step status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.step.status\"",
     ]
   }
 
