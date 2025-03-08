@@ -178,7 +178,7 @@ otelcol.processor.batch "github_actions_batch" {
   }
 }
 
-// Transform processor to standardize attributes
+// Transform processor to standardize attributes and convert to metrics
 otelcol.processor.transform "github_actions_transform" {
   error_mode = "ignore"
   
@@ -191,8 +191,16 @@ otelcol.processor.transform "github_actions_transform" {
       // Only set step fields if they exist
       "set(attributes[\"workflow.step.name\"], attributes[\"step_name\"]) where attributes[\"step_name\"] != nil and attributes[\"step_name\"] != \"\"",
       "set(attributes[\"workflow.step.id\"], attributes[\"step_number\"]) where attributes[\"step_number\"] != nil and attributes[\"step_number\"] != \"\"",
+      // Track timestamps for duration calculation
+      "set(attributes[\"start_time\"], timestamp) where body matches \".*started.*\"",
+      "set(attributes[\"end_time\"], timestamp) where body matches \".*completed.*\"",
       // Add metric source
       "set(attributes[\"metric.source\"], \"logs\")",
+      // Calculate durations when we have both timestamps
+      "set(attributes[\"duration\"], unix_nano(end_time) - unix_nano(start_time)) where start_time != nil and end_time != nil",
+      // Map status values
+      "set(attributes[\"status_value\"], 1) where body matches \".*completed successfully.*\"",
+      "set(attributes[\"status_value\"], 0) where body matches \".*failed.*\"",
       // Clean up temporary attributes
       "delete_key(attributes, \"job_name\")",
       "delete_key(attributes, \"step_name\") where attributes[\"step_name\"] != nil",
@@ -202,44 +210,36 @@ otelcol.processor.transform "github_actions_transform" {
     ]
   }
 
-  output {
-    logs = [otelcol.connector.spanmetrics.metrics_from_logs.input]
-  }
-}
-
-/////////////////////////////////////////////////////////////
-// CONNECTORS
-/////////////////////////////////////////////////////////////
-
-// Extract metrics from logs
-otelcol.connector.spanmetrics "metrics_from_logs" {
-  metrics_flush_interval = "15s"
-  namespace = "github.actions"
-  
-  dimension {
-    name = "workflow.name"
-  }
-  dimension {
-    name = "workflow.job.name"
-  }
-  dimension {
-    name = "workflow.step.name"
-  }
-  dimension {
-    name = "run.status"
-  }
-  dimension {
-    name = "run.conclusion"
-  }
-  dimension {
-    name = "metric.source"
-  }
-  
-  histogram {
-    exponential {
-      max_size = 100
-    }
-    unit = "s"
+  metric_statements {
+    context = "datapoint"
+    statements = [
+      // Duration metrics (convert from nano to seconds)
+      "set(metric.name, \"workflow.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.name\"] != nil",
+      "set(metric.value, attributes[\"duration\"] / 1e9) where metric.name == \"workflow.duration\"",
+      "set(metric.name, \"workflow.job.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.job.name\"] != nil",
+      "set(metric.value, attributes[\"duration\"] / 1e9) where metric.name == \"workflow.job.duration\"",
+      "set(metric.name, \"workflow.step.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.step.name\"] != nil",
+      "set(metric.value, attributes[\"duration\"] / 1e9) where metric.name == \"workflow.step.duration\"",
+      // Status metrics
+      "set(metric.name, \"workflow.status\") where attributes[\"workflow.status\"] != nil",
+      "set(metric.value, attributes[\"status_value\"]) where metric.name == \"workflow.status\"",
+      "set(metric.name, \"workflow.conclusion\") where attributes[\"workflow.conclusion\"] != nil",
+      "set(metric.value, attributes[\"status_value\"]) where metric.name == \"workflow.conclusion\"",
+      "set(metric.name, \"workflow.job.status\") where attributes[\"workflow.job.status\"] != nil",
+      "set(metric.value, attributes[\"status_value\"]) where metric.name == \"workflow.job.status\"",
+      "set(metric.name, \"workflow.step.status\") where attributes[\"workflow.step.status\"] != nil",
+      "set(metric.value, attributes[\"status_value\"]) where metric.name == \"workflow.step.status\"",
+      // Set units for duration metrics
+      "set(metric.unit, \"s\") where contains(metric.name, \"duration\")",
+      // Set descriptions
+      "set(metric.description, \"Duration of workflow execution\") where metric.name == \"workflow.duration\"",
+      "set(metric.description, \"Duration of job execution\") where metric.name == \"workflow.job.duration\"",
+      "set(metric.description, \"Duration of step execution\") where metric.name == \"workflow.step.duration\"",
+      "set(metric.description, \"Current workflow status (1=success, 0=failure)\") where metric.name == \"workflow.status\"",
+      "set(metric.description, \"Workflow conclusion (1=success, 0=failure)\") where metric.name == \"workflow.conclusion\"",
+      "set(metric.description, \"Current job status (1=success, 0=failure)\") where metric.name == \"workflow.job.status\"",
+      "set(metric.description, \"Current step status (1=success, 0=failure)\") where metric.name == \"workflow.step.status\"",
+    ]
   }
 
   output {
