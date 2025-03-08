@@ -293,7 +293,7 @@ otelcol.processor.transform "github_actions_transform" {
       "set(log.attributes[\"workflow.job.name\"], log.attributes[\"job.name\"]) where log.attributes[\"error\"] == nil and log.attributes[\"job.name\"] != nil",
       "set(log.attributes[\"workflow.job.id\"], log.attributes[\"job.id\"]) where log.attributes[\"error\"] == nil and log.attributes[\"job.id\"] != nil",
       "set(log.attributes[\"workflow.step.name\"], log.attributes[\"step.name\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.name\"] != nil and log.attributes[\"step.name\"] != \"\"",
-      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.number\"] != nil and log.attributes[\"step.number\"] != \"\""
+      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.number\"] != nil and log.attributes[\"step.number\"] != \"\"",
     ]
   }
 
@@ -338,7 +338,7 @@ otelcol.processor.transform "github_actions_transform" {
       "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where metric.name == \"workflow.duration\" or metric.name == \"workflow.status\" or metric.name == \"workflow.conclusion\"",
       "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"error\"]) where contains(metric.name, \"workflow.job\")",
       "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\", \"error\"]) where contains(metric.name, \"workflow.step\")",
-      "delete_key(metric.attributes, \"validation.state\")"
+      "delete_key(metric.attributes, \"validation.state\")",
     ]
   }
 
