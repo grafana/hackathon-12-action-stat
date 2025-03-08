@@ -251,31 +251,42 @@ otelcol.processor.transform "github_actions_transform" {
     context = "datapoint"
     statements = [
       // Duration metrics (convert from nano to seconds)
-      "set(metric.name, \"workflow.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.name\"] != nil",
-      "set(metric.value, Divide(Int(attributes[\"duration\"]), 1000000000)) where metric.name == \"workflow.duration\"",
-      "set(metric.name, \"workflow.job.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.job.name\"] != nil",
-      "set(metric.value, Divide(Int(attributes[\"duration\"]), 1000000000)) where metric.name == \"workflow.job.duration\"",
-      "set(metric.name, \"workflow.step.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.step.name\"] != nil",
-      "set(metric.value, Divide(Int(attributes[\"duration\"]), 1000000000)) where metric.name == \"workflow.step.duration\"",
+      "set(name, \"workflow.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.name\"] != nil",
+      "set(value_double, Divide(Int(attributes[\"duration\"]), 1000000000)) where name == \"workflow.duration\"",
+      "set(metric_type, 2) where name == \"workflow.duration\"",  // GAUGE type
+      "set(name, \"workflow.job.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.job.name\"] != nil",
+      "set(value_double, Divide(Int(attributes[\"duration\"]), 1000000000)) where name == \"workflow.job.duration\"",
+      "set(metric_type, 2) where name == \"workflow.job.duration\"",  // GAUGE type
+      "set(name, \"workflow.step.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.step.name\"] != nil",
+      "set(value_double, Divide(Int(attributes[\"duration\"]), 1000000000)) where name == \"workflow.step.duration\"",
+      "set(metric_type, 2) where name == \"workflow.step.duration\"",  // GAUGE type
       // Status metrics with proper attribute checks
-      "set(metric.name, \"workflow.status\") where attributes[\"workflow.status\"] != nil",
-      "set(metric.value, Int(attributes[\"workflow.status\"])) where metric.name == \"workflow.status\"",
-      "set(metric.name, \"workflow.conclusion\") where attributes[\"workflow.conclusion\"] != nil",
-      "set(metric.value, Int(attributes[\"workflow.conclusion\"])) where metric.name == \"workflow.conclusion\"",
-      "set(metric.name, \"workflow.job.status\") where attributes[\"workflow.job.status\"] != nil",
-      "set(metric.value, Int(attributes[\"workflow.job.status\"])) where metric.name == \"workflow.job.status\"",
-      "set(metric.name, \"workflow.step.status\") where attributes[\"workflow.step.status\"] != nil",
-      "set(metric.value, Int(attributes[\"workflow.step.status\"])) where metric.name == \"workflow.step.status\"",
+      "set(name, \"workflow.status\") where attributes[\"workflow.status\"] != nil",
+      "set(value_int, Int(attributes[\"workflow.status\"])) where name == \"workflow.status\"",
+      "set(metric_type, 2) where name == \"workflow.status\"",  // GAUGE type
+      "set(name, \"workflow.conclusion\") where attributes[\"workflow.conclusion\"] != nil",
+      "set(value_int, Int(attributes[\"workflow.conclusion\"])) where name == \"workflow.conclusion\"",
+      "set(metric_type, 2) where name == \"workflow.conclusion\"",  // GAUGE type
+      "set(name, \"workflow.job.status\") where attributes[\"workflow.job.status\"] != nil",
+      "set(value_int, Int(attributes[\"workflow.job.status\"])) where name == \"workflow.job.status\"",
+      "set(metric_type, 2) where name == \"workflow.job.status\"",  // GAUGE type
+      "set(name, \"workflow.step.status\") where attributes[\"workflow.step.status\"] != nil",
+      "set(value_int, Int(attributes[\"workflow.step.status\"])) where name == \"workflow.step.status\"",
+      "set(metric_type, 2) where name == \"workflow.step.status\"",  // GAUGE type
       // Set units for duration metrics
-      "set(metric.unit, \"s\") where Contains(metric.name, \"duration\")",
+      "set(unit, \"s\") where name matches \".*duration\"",
       // Set descriptions with proper status value documentation
-      "set(metric.description, \"Duration of workflow execution in seconds\") where metric.name == \"workflow.duration\"",
-      "set(metric.description, \"Duration of job execution in seconds\") where metric.name == \"workflow.job.duration\"",
-      "set(metric.description, \"Duration of step execution in seconds\") where metric.name == \"workflow.step.duration\"",
-      "set(metric.description, \"Current workflow status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.status\"",
-      "set(metric.description, \"Workflow conclusion (0=failed, 1=success, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.conclusion\"",
-      "set(metric.description, \"Current job status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.job.status\"",
-      "set(metric.description, \"Current step status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.step.status\"",
+      "set(description, \"Duration of workflow execution in seconds\") where name == \"workflow.duration\"",
+      "set(description, \"Duration of job execution in seconds\") where name == \"workflow.job.duration\"",
+      "set(description, \"Duration of step execution in seconds\") where name == \"workflow.step.duration\"",
+      "set(description, \"Current workflow status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.status\"",
+      "set(description, \"Workflow conclusion (0=failed, 1=success, 3=cancelled, 4=skipped)\") where name == \"workflow.conclusion\"",
+      "set(description, \"Current job status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.job.status\"",
+      "set(description, \"Current step status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.step.status\"",
+      // Propagate relevant attributes as dimensions
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\"]) where name == \"workflow.duration\" or name == \"workflow.status\" or name == \"workflow.conclusion\"",
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\"]) where name == \"workflow.job.duration\" or name == \"workflow.job.status\"",
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\"]) where name == \"workflow.step.duration\" or name == \"workflow.step.status\"",
     ]
   }
 
