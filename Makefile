@@ -71,6 +71,7 @@ release:
 	git tag -f $(MAJOR_VERSION)
 	git push -f origin tag $(MAJOR_VERSION)
 
+build-push-release: build-push-image release
 
 run-local: check-docker
 	docker run -it \
