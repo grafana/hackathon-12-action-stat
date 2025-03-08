@@ -252,22 +252,22 @@ otelcol.processor.transform "github_actions_transform" {
     statements = [
       // Duration metrics (convert from nano to seconds)
       "set(metric.name, \"workflow.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.name\"] != nil",
-      "set(metric.value, divide(attributes[\"duration\"], 1000000000)) where metric.name == \"workflow.duration\"",
+      "set(metric.value, Divide(Int(attributes[\"duration\"]), 1000000000)) where metric.name == \"workflow.duration\"",
       "set(metric.name, \"workflow.job.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.job.name\"] != nil",
-      "set(metric.value, divide(attributes[\"duration\"], 1000000000)) where metric.name == \"workflow.job.duration\"",
+      "set(metric.value, Divide(Int(attributes[\"duration\"]), 1000000000)) where metric.name == \"workflow.job.duration\"",
       "set(metric.name, \"workflow.step.duration\") where attributes[\"duration\"] != nil and attributes[\"workflow.step.name\"] != nil",
-      "set(metric.value, divide(attributes[\"duration\"], 1000000000)) where metric.name == \"workflow.step.duration\"",
+      "set(metric.value, Divide(Int(attributes[\"duration\"]), 1000000000)) where metric.name == \"workflow.step.duration\"",
       // Status metrics with proper attribute checks
       "set(metric.name, \"workflow.status\") where attributes[\"workflow.status\"] != nil",
-      "set(metric.value, attributes[\"workflow.status\"]) where metric.name == \"workflow.status\"",
+      "set(metric.value, Int(attributes[\"workflow.status\"])) where metric.name == \"workflow.status\"",
       "set(metric.name, \"workflow.conclusion\") where attributes[\"workflow.conclusion\"] != nil",
-      "set(metric.value, attributes[\"workflow.conclusion\"]) where metric.name == \"workflow.conclusion\"",
+      "set(metric.value, Int(attributes[\"workflow.conclusion\"])) where metric.name == \"workflow.conclusion\"",
       "set(metric.name, \"workflow.job.status\") where attributes[\"workflow.job.status\"] != nil",
-      "set(metric.value, attributes[\"workflow.job.status\"]) where metric.name == \"workflow.job.status\"",
+      "set(metric.value, Int(attributes[\"workflow.job.status\"])) where metric.name == \"workflow.job.status\"",
       "set(metric.name, \"workflow.step.status\") where attributes[\"workflow.step.status\"] != nil",
-      "set(metric.value, attributes[\"workflow.step.status\"]) where metric.name == \"workflow.step.status\"",
+      "set(metric.value, Int(attributes[\"workflow.step.status\"])) where metric.name == \"workflow.step.status\"",
       // Set units for duration metrics
-      "set(metric.unit, \"s\") where contains(metric.name, \"duration\")",
+      "set(metric.unit, \"s\") where Contains(metric.name, \"duration\")",
       // Set descriptions with proper status value documentation
       "set(metric.description, \"Duration of workflow execution in seconds\") where metric.name == \"workflow.duration\"",
       "set(metric.description, \"Duration of job execution in seconds\") where metric.name == \"workflow.job.duration\"",
