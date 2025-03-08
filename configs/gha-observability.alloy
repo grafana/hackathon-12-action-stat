@@ -54,7 +54,7 @@ otelcol.receiver.filelog "github_actions_logs" {
           "step.number" = { from = "step_number" },
           "original.filename" = { from = "log.file.name" },
           "parse.success" = { value = true },
-        }
+        },
       ],
     },
     // Parse log line format with enhanced error handling and validation
@@ -71,7 +71,7 @@ otelcol.receiver.filelog "github_actions_logs" {
           "original.timestamp" = { from = "timestamp" },
           "original.body" = { from = "body" },
           "parse.line.success" = { value = true },
-        }
+        },
       ],
     },
     // Parse timestamp with strict validation and comprehensive error tracking
@@ -87,7 +87,7 @@ otelcol.receiver.filelog "github_actions_logs" {
           "timestamp.valid" = { value = true },
           "timestamp.format" = { value = "%Y-%m-%dT%H:%M:%S.%fZ" },
           "parse.timestamp.success" = { value = true },
-        }
+        },
       ],
     },
   ]
@@ -130,7 +130,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
           "original.body" = { from = "body" },
           "parse.json.success" = { value = true },
           "validation.timestamp" = { from = "createdAt" },
-        }
+        },
       ],
     },
     // Then parse timestamp with strict validation and error tracking
@@ -146,7 +146,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
           "timestamp.valid" = { value = true },
           "timestamp.format" = { value = "%Y-%m-%dT%H:%M:%S.%fZ" },
           "parse.timestamp.success" = { value = true },
-        }
+        },
       ],
     },
     // Workflow level attributes with enhanced validation
@@ -159,7 +159,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "workflow.name.original" = { from = "workflowName" },
           "workflow.name.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -171,7 +171,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "workflow.id.original" = { from = "workflowDatabaseId" },
           "workflow.id.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -183,7 +183,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "run.id.original" = { from = "databaseId" },
           "run.id.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -195,7 +195,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "run.status.original" = { from = "status" },
           "run.status.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -207,7 +207,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "run.conclusion.original" = { from = "conclusion" },
           "run.conclusion.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -219,7 +219,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "workflow.duration.original" = { from = "duration" },
           "workflow.duration.valid" = { value = true },
-        }
+        },
       ],
     },
     // Job level attributes with enhanced validation
@@ -232,7 +232,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "job.name.original" = { from = "jobs[\"*\"].name" },
           "job.name.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -244,7 +244,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "job.status.original" = { from = "jobs[\"*\"].status" },
           "job.status.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -256,7 +256,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "job.duration.original" = { from = "jobs[\"*\"].duration" },
           "job.duration.valid" = { value = true },
-        }
+        },
       ],
     },
     // Step level attributes with enhanced validation
@@ -269,7 +269,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "step.name.original" = { from = "jobs[\"*\"].steps[\"*\"].name" },
           "step.name.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -281,7 +281,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "step.status.original" = { from = "jobs[\"*\"].steps[\"*\"].status" },
           "step.status.valid" = { value = true },
-        }
+        },
       ],
     },
     {
@@ -293,7 +293,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
         {
           "step.duration.original" = { from = "jobs[\"*\"].steps[\"*\"].duration" },
           "step.duration.valid" = { value = true },
-        }
+        },
       ],
     },
   ]
