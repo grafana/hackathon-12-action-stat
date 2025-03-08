@@ -264,10 +264,10 @@ otelcol.processor.transform "github_actions_transform" {
   log_statements {
     context = "log"
     statements = [
-      "set(log.attributes[\"workflow.job.name\"], log.attributes[\"job.name\"])",
-      "set(log.attributes[\"workflow.job.id\"], log.attributes[\"job.id\"])",
-      "set(log.attributes[\"workflow.step.name\"], log.attributes[\"step.name\"])",
-      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"])",
+      "set(attributes[\"workflow.job.name\"], attributes[\"job.name\"])",
+      "set(attributes[\"workflow.job.id\"], attributes[\"job.id\"])",
+      "set(attributes[\"workflow.step.name\"], attributes[\"step.name\"])",
+      "set(attributes[\"workflow.step.id\"], attributes[\"step.number\"])",
     ]
   }
 
@@ -281,13 +281,14 @@ otelcol.processor.transform "github_actions_transform" {
       "set(name, \"workflow.conclusion\")",
       "set(name, \"workflow.job.status\")",
       "set(name, \"workflow.step.status\")",
-      "set(value.double, attributes[\"duration\"])",
-      "set(value.int, attributes[\"workflow.status\"])",
-      "set(value.int, attributes[\"workflow.conclusion\"])",
-      "set(value.int, attributes[\"workflow.job.status\"])",
-      "set(value.int, attributes[\"workflow.step.status\"])",
+      "set(gauge_value, attributes[\"duration\"])",
+      "set(gauge_value, attributes[\"workflow.status\"])",
+      "set(gauge_value, attributes[\"workflow.conclusion\"])",
+      "set(gauge_value, attributes[\"workflow.job.status\"])",
+      "set(gauge_value, attributes[\"workflow.step.status\"])",
       "set(unit, \"s\")",
-      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\"])",
+      "set(attributes[\"workflow.name\"], attributes[\"workflow.name\"])",
+      "set(attributes[\"workflow.run_id\"], attributes[\"workflow.run_id\"])",
     ]
   }
 
