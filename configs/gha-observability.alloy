@@ -324,65 +324,65 @@ otelcol.processor.transform "github_actions_transform" {
   log_statements {
     context = "log"
     statements = [
-      "set(log.attributes[\"validation.state\"], \"checking_resource_attributes\")"
-      "set(log.attributes[\"error\"], \"missing_workflow_name\") where resource.attributes[\"workflow.name\"] == nil"
-      "set(log.attributes[\"error\"], \"missing_workflow_run_id\") where log.attributes[\"error\"] == nil and resource.attributes[\"workflow.run_id\"] == nil"
+      "set(log.attributes[\"validation.state\"], \"checking_resource_attributes\"),",
+      "set(log.attributes[\"error\"], \"missing_workflow_name\") where resource.attributes[\"workflow.name\"] == nil,",
+      "set(log.attributes[\"error\"], \"missing_workflow_run_id\") where log.attributes[\"error\"] == nil and resource.attributes[\"workflow.run_id\"] == nil,",
       
-      "set(log.attributes[\"validation.state\"], \"checking_input_attributes\")"
-      "set(log.attributes[\"error\"], \"missing_required_attributes\") where log.attributes[\"error\"] == nil and (log.attributes[\"timestamp.valid\"] == nil or log.attributes[\"parsed_timestamp\"] == nil)"
+      "set(log.attributes[\"validation.state\"], \"checking_input_attributes\"),",
+      "set(log.attributes[\"error\"], \"missing_required_attributes\") where log.attributes[\"error\"] == nil and (log.attributes[\"timestamp.valid\"] == nil or log.attributes[\"parsed_timestamp\"] == nil),",
       
-      "set(log.attributes[\"validation.state\"], \"normalizing_fields\")"
-      "set(log.attributes[\"error\"], \"invalid_job_name\") where log.attributes[\"job.name\"] != nil and IsString(log.attributes[\"job.name\"]) == false"
-      "set(log.attributes[\"error\"], \"invalid_step_name\") where log.attributes[\"step.name\"] != nil and IsString(log.attributes[\"step.name\"]) == false"
-      "set(log.attributes[\"workflow.job.name\"], log.attributes[\"job.name\"]) where log.attributes[\"error\"] == nil and log.attributes[\"job.name\"] != nil"
-      "set(log.attributes[\"workflow.job.id\"], log.attributes[\"job.id\"]) where log.attributes[\"error\"] == nil and log.attributes[\"job.id\"] != nil"
-      "set(log.attributes[\"workflow.step.name\"], log.attributes[\"step.name\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.name\"] != nil and log.attributes[\"step.name\"] != \"\""
-      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.number\"] != nil and log.attributes[\"step.number\"] != \"\""
+      "set(log.attributes[\"validation.state\"], \"normalizing_fields\"),",
+      "set(log.attributes[\"error\"], \"invalid_job_name\") where log.attributes[\"job.name\"] != nil and IsString(log.attributes[\"job.name\"]) == false,",
+      "set(log.attributes[\"error\"], \"invalid_step_name\") where log.attributes[\"step.name\"] != nil and IsString(log.attributes[\"step.name\"]) == false,",
+      "set(log.attributes[\"workflow.job.name\"], log.attributes[\"job.name\"]) where log.attributes[\"error\"] == nil and log.attributes[\"job.name\"] != nil,",
+      "set(log.attributes[\"workflow.job.id\"], log.attributes[\"job.id\"]) where log.attributes[\"error\"] == nil and log.attributes[\"job.id\"] != nil,",
+      "set(log.attributes[\"workflow.step.name\"], log.attributes[\"step.name\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.name\"] != nil and log.attributes[\"step.name\"] != \"\",",
+      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"]) where log.attributes[\"error\"] == nil and log.attributes[\"step.number\"] != nil and log.attributes[\"step.number\"] != \"\",",
     ]
   }
 
   metric_statements {
     context = "datapoint"
     statements = [
-      "set(metric.attributes[\"validation.state\"], \"setting_metric_properties\")"
-      "set(metric.aggregation_temporality, \"delta\")"
-      "set(metric.type, \"gauge\")"
+      "set(metric.attributes[\"validation.state\"], \"setting_metric_properties\"),",
+      "set(metric.aggregation_temporality, \"delta\"),",
+      "set(metric.type, \"gauge\"),",
       
-      "set(metric.attributes[\"validation.state\"], \"validating_metrics\")"
-      "set(metric.attributes[\"error\"], \"missing_workflow_name\") where metric.attributes[\"workflow.name\"] == nil"
-      "set(metric.attributes[\"error\"], \"missing_duration\") where metric.attributes[\"error\"] == nil and contains(metric.name, \"duration\") and metric.attributes[\"duration\"] == nil"
-      "set(metric.attributes[\"error\"], \"invalid_duration\") where metric.attributes[\"error\"] == nil and contains(metric.name, \"duration\") and (IsFloat(metric.attributes[\"duration\"]) == false or ToDouble(metric.attributes[\"duration\"]) < 0)"
+      "set(metric.attributes[\"validation.state\"], \"validating_metrics\"),",
+      "set(metric.attributes[\"error\"], \"missing_workflow_name\") where metric.attributes[\"workflow.name\"] == nil,",
+      "set(metric.attributes[\"error\"], \"missing_duration\") where metric.attributes[\"error\"] == nil and contains(metric.name, \"duration\") and metric.attributes[\"duration\"] == nil,",
+      "set(metric.attributes[\"error\"], \"invalid_duration\") where metric.attributes[\"error\"] == nil and contains(metric.name, \"duration\") and (IsFloat(metric.attributes[\"duration\"]) == false or ToDouble(metric.attributes[\"duration\"]) < 0),",
       
-      "set(metric.attributes[\"validation.state\"], \"validating_duration_metrics\")"
-      "set(metric.attributes[\"error\"], \"invalid_duration_value\") where metric.attributes[\"error\"] == nil and metric.attributes[\"duration\"] != nil and (IsFloat(metric.attributes[\"duration\"]) == false or ToDouble(metric.attributes[\"duration\"]) < 0)"
+      "set(metric.attributes[\"validation.state\"], \"validating_duration_metrics\"),",
+      "set(metric.attributes[\"error\"], \"invalid_duration_value\") where metric.attributes[\"error\"] == nil and metric.attributes[\"duration\"] != nil and (IsFloat(metric.attributes[\"duration\"]) == false or ToDouble(metric.attributes[\"duration\"]) < 0),",
       
-      "set(metric.attributes[\"validation.state\"], \"setting_metric_names\")"
-      "set(metric.name, \"workflow.duration\") where metric.attributes[\"error\"] == nil and metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.name\"] != nil and ToDouble(metric.attributes[\"duration\"]) >= 0"
-      "set(metric.name, \"workflow.job.duration\") where metric.attributes[\"error\"] == nil and metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.job.name\"] != nil and ToDouble(metric.attributes[\"duration\"]) >= 0"
-      "set(metric.name, \"workflow.step.duration\") where metric.attributes[\"error\"] == nil and metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.step.name\"] != nil and ToDouble(metric.attributes[\"duration\"]) >= 0"
+      "set(metric.attributes[\"validation.state\"], \"setting_metric_names\"),",
+      "set(metric.name, \"workflow.duration\") where metric.attributes[\"error\"] == nil and metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.name\"] != nil and ToDouble(metric.attributes[\"duration\"]) >= 0,",
+      "set(metric.name, \"workflow.job.duration\") where metric.attributes[\"error\"] == nil and metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.job.name\"] != nil and ToDouble(metric.attributes[\"duration\"]) >= 0,",
+      "set(metric.name, \"workflow.step.duration\") where metric.attributes[\"error\"] == nil and metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.step.name\"] != nil and ToDouble(metric.attributes[\"duration\"]) >= 0,",
       
-      "set(metric.attributes[\"validation.state\"], \"setting_metric_values\")"
-      "set(metric.value, ToDouble(metric.attributes[\"duration\"]) / 1000000000) where contains(metric.name, \"duration\") and ToDouble(metric.attributes[\"duration\"]) >= 0"
-      "set(metric.value, ToInt(metric.attributes[\"workflow.status\"])) where metric.name == \"workflow.status\""
-      "set(metric.value, ToInt(metric.attributes[\"workflow.conclusion\"])) where metric.name == \"workflow.conclusion\""
-      "set(metric.value, ToInt(metric.attributes[\"workflow.job.status\"])) where metric.name == \"workflow.job.status\""
-      "set(metric.value, ToInt(metric.attributes[\"workflow.step.status\"])) where metric.name == \"workflow.step.status\""
+      "set(metric.attributes[\"validation.state\"], \"setting_metric_values\"),",
+      "set(metric.value, ToDouble(metric.attributes[\"duration\"]) / 1000000000) where contains(metric.name, \"duration\") and ToDouble(metric.attributes[\"duration\"]) >= 0,",
+      "set(metric.value, ToInt(metric.attributes[\"workflow.status\"])) where metric.name == \"workflow.status\",",
+      "set(metric.value, ToInt(metric.attributes[\"workflow.conclusion\"])) where metric.name == \"workflow.conclusion\",",
+      "set(metric.value, ToInt(metric.attributes[\"workflow.job.status\"])) where metric.name == \"workflow.job.status\",",
+      "set(metric.value, ToInt(metric.attributes[\"workflow.step.status\"])) where metric.name == \"workflow.step.status\",",
       
-      "set(metric.attributes[\"validation.state\"], \"setting_metadata\")"
-      "set(metric.unit, \"s\") where contains(metric.name, \"duration\")"
-      "set(metric.description, \"Duration of workflow execution in seconds\") where metric.name == \"workflow.duration\""
-      "set(metric.description, \"Duration of job execution in seconds\") where metric.name == \"workflow.job.duration\""
-      "set(metric.description, \"Duration of step execution in seconds\") where metric.name == \"workflow.step.duration\""
-      "set(metric.description, \"Current workflow status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.status\""
-      "set(metric.description, \"Workflow conclusion (0=failed, 1=success, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.conclusion\""
-      "set(metric.description, \"Current job status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.job.status\""
-      "set(metric.description, \"Current step status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.step.status\""
+      "set(metric.attributes[\"validation.state\"], \"setting_metadata\"),",
+      "set(metric.unit, \"s\") where contains(metric.name, \"duration\"),",
+      "set(metric.description, \"Duration of workflow execution in seconds\") where metric.name == \"workflow.duration\",",
+      "set(metric.description, \"Duration of job execution in seconds\") where metric.name == \"workflow.job.duration\",",
+      "set(metric.description, \"Duration of step execution in seconds\") where metric.name == \"workflow.step.duration\",",
+      "set(metric.description, \"Current workflow status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.status\",",
+      "set(metric.description, \"Workflow conclusion (0=failed, 1=success, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.conclusion\",",
+      "set(metric.description, \"Current job status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.job.status\",",
+      "set(metric.description, \"Current step status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.step.status\",",
       
-      "set(metric.attributes[\"validation.state\"], \"final_cleanup\")"
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where metric.name == \"workflow.duration\" or metric.name == \"workflow.status\" or metric.name == \"workflow.conclusion\""
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"error\"]) where contains(metric.name, \"workflow.job\")"
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\", \"error\"]) where contains(metric.name, \"workflow.step\")"
-      "delete_key(metric.attributes, \"validation.state\")"
+      "set(metric.attributes[\"validation.state\"], \"final_cleanup\"),",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where metric.name == \"workflow.duration\" or metric.name == \"workflow.status\" or metric.name == \"workflow.conclusion\",",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"error\"]) where contains(metric.name, \"workflow.job\"),",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\", \"error\"]) where contains(metric.name, \"workflow.step\"),",
+      "delete_key(metric.attributes, \"validation.state\"),",
     ]
   }
 
