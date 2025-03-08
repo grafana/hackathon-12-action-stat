@@ -272,7 +272,7 @@ otelcol.processor.transform "github_actions_transform" {
   }
 
   metric_statements {
-    context = "datapoint"
+    context = "metric"
     statements = [
       "set(name, \"workflow.duration\")",
       "set(name, \"workflow.job.duration\")",
