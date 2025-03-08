@@ -269,7 +269,8 @@ otelcol.processor.transform "github_actions_transform" {
       "set(log.attributes[\"error\"], \"missing_workflow_run_id\") where resource.attributes[\"workflow.run_id\"] == nil",
       
       "set(log.attributes[\"validation.state\"], \"checking_input_attributes\")",
-      "set(log.attributes[\"error\"], \"missing_required_attributes\") where log.attributes[\"timestamp.valid\"] == nil or log.attributes[\"parsed_timestamp\"] == nil",
+      "set(log.attributes[\"error\"], \"missing_required_attributes\") where log.attributes[\"timestamp.valid\"] == nil",
+      "set(log.attributes[\"error\"], \"missing_required_attributes\") where log.attributes[\"parsed_timestamp\"] == nil",
       
       "set(log.attributes[\"validation.state\"], \"normalizing_fields\")",
       "set(log.attributes[\"error\"], \"invalid_job_name\") where IsString(log.attributes[\"job.name\"]) == false",
@@ -290,16 +291,16 @@ otelcol.processor.transform "github_actions_transform" {
       
       "set(metric.attributes[\"validation.state\"], \"validating_metrics\")",
       "set(metric.attributes[\"error\"], \"missing_workflow_name\") where metric.attributes[\"workflow.name\"] == nil",
-      "set(metric.attributes[\"error\"], \"missing_duration\") where contains(metric.name, \"duration\") and metric.attributes[\"duration\"] == nil",
-      "set(metric.attributes[\"error\"], \"invalid_duration\") where contains(metric.name, \"duration\") and IsFloat(metric.attributes[\"duration\"]) == false",
+      "set(metric.attributes[\"error\"], \"missing_duration\") where contains(metric.name, \"duration\") where metric.attributes[\"duration\"] == nil",
+      "set(metric.attributes[\"error\"], \"invalid_duration\") where contains(metric.name, \"duration\") where IsFloat(metric.attributes[\"duration\"]) == false",
       
       "set(metric.attributes[\"validation.state\"], \"validating_duration_metrics\")",
-      "set(metric.attributes[\"error\"], \"invalid_duration_value\") where metric.attributes[\"duration\"] != nil and IsFloat(metric.attributes[\"duration\"]) == false",
+      "set(metric.attributes[\"error\"], \"invalid_duration_value\") where metric.attributes[\"duration\"] != nil where IsFloat(metric.attributes[\"duration\"]) == false",
       
       "set(metric.attributes[\"validation.state\"], \"setting_metric_names\")",
-      "set(metric.name, \"workflow.duration\") where metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.name\"] != nil",
-      "set(metric.name, \"workflow.job.duration\") where metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.job.name\"] != nil",
-      "set(metric.name, \"workflow.step.duration\") where metric.attributes[\"duration\"] != nil and metric.attributes[\"workflow.step.name\"] != nil",
+      "set(metric.name, \"workflow.duration\") where metric.attributes[\"duration\"] != nil where metric.attributes[\"workflow.name\"] != nil",
+      "set(metric.name, \"workflow.job.duration\") where metric.attributes[\"duration\"] != nil where metric.attributes[\"workflow.job.name\"] != nil",
+      "set(metric.name, \"workflow.step.duration\") where metric.attributes[\"duration\"] != nil where metric.attributes[\"workflow.step.name\"] != nil",
       
       "set(metric.attributes[\"validation.state\"], \"setting_metric_values\")",
       "set(metric.value, ToDouble(metric.attributes[\"duration\"]) / 1000000000) where contains(metric.name, \"duration\")",
@@ -319,7 +320,9 @@ otelcol.processor.transform "github_actions_transform" {
       "set(metric.description, \"Current step status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where metric.name == \"workflow.step.status\"",
       
       "set(metric.attributes[\"validation.state\"], \"final_cleanup\")",
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where metric.name == \"workflow.duration\" or metric.name == \"workflow.status\" or metric.name == \"workflow.conclusion\"",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where metric.name == \"workflow.duration\"",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where metric.name == \"workflow.status\"",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where metric.name == \"workflow.conclusion\"",
       "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"error\"]) where contains(metric.name, \"workflow.job\")",
       "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\", \"error\"]) where contains(metric.name, \"workflow.step\")",
       "delete_key(metric.attributes, \"validation.state\")",
