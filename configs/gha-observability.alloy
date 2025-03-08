@@ -48,14 +48,14 @@ otelcol.receiver.filelog "github_actions_logs" {
         layout_type = "strptime",
         layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       },
-      output = {
-        attributes = {
+      output = [
+        {
           "job.id" = { from = "job_id" },
           "step.number" = { from = "step_number" },
           "original.filename" = { from = "log.file.name" },
           "parse.success" = { value = true },
-        },
-      },
+        }
+      ],
     },
     // Parse log line format with enhanced error handling and validation
     {
@@ -63,16 +63,16 @@ otelcol.receiver.filelog "github_actions_logs" {
       parse_from = "body",
       regex = "^(?:(?P<job_name>[^\\t]*?)\\t(?P<step_name>[^\\t]*?)\\t)?(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+Z).*$",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "job.name" = { from = "job_name" },
           "step.name" = { from = "step_name" },
           "timestamp" = { from = "timestamp" },
           "original.timestamp" = { from = "timestamp" },
           "original.body" = { from = "body" },
           "parse.line.success" = { value = true },
-        },
-      },
+        }
+      ],
     },
     // Parse timestamp with strict validation and comprehensive error tracking
     {
@@ -81,14 +81,14 @@ otelcol.receiver.filelog "github_actions_logs" {
       layout_type = "strptime",
       layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "parsed_timestamp" = { from = "timestamp" },
           "timestamp.valid" = { value = true },
           "timestamp.format" = { value = "%Y-%m-%dT%H:%M:%S.%fZ" },
           "parse.timestamp.success" = { value = true },
-        },
-      },
+        }
+      ],
     },
   ]
 
@@ -125,13 +125,13 @@ otelcol.receiver.filelog "github_actions_metrics" {
         layout_type = "strptime",
         layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       },
-      output = {
-        attributes = {
+      output = [
+        {
           "original.body" = { from = "body" },
           "parse.json.success" = { value = true },
           "validation.timestamp" = { from = "createdAt" },
-        },
-      },
+        }
+      ],
     },
     // Then parse timestamp with strict validation and error tracking
     {
@@ -140,14 +140,14 @@ otelcol.receiver.filelog "github_actions_metrics" {
       layout_type = "strptime",
       layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "parsed_timestamp" = { from = "createdAt" },
           "timestamp.valid" = { value = true },
           "timestamp.format" = { value = "%Y-%m-%dT%H:%M:%S.%fZ" },
           "parse.timestamp.success" = { value = true },
-        },
-      },
+        }
+      ],
     },
     // Workflow level attributes with enhanced validation
     {
@@ -155,72 +155,72 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.workflowName",
       to = "attributes.workflow.name",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "workflow.name.original" = { from = "workflowName" },
           "workflow.name.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "move",
       from = "attributes.workflowDatabaseId",
       to = "attributes.workflow.id",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "workflow.id.original" = { from = "workflowDatabaseId" },
           "workflow.id.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "move",
       from = "attributes.databaseId",
       to = "attributes.run.id",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "run.id.original" = { from = "databaseId" },
           "run.id.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "move",
       from = "attributes.status",
       to = "attributes.run.status",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "run.status.original" = { from = "status" },
           "run.status.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "move",
       from = "attributes.conclusion",
       to = "attributes.run.conclusion",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "run.conclusion.original" = { from = "conclusion" },
           "run.conclusion.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "move",
       from = "attributes.duration",
       to = "attributes.workflow.duration",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "workflow.duration.original" = { from = "duration" },
           "workflow.duration.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     // Job level attributes with enhanced validation
     {
@@ -228,36 +228,36 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.jobs[\"*\"].name",
       to = "attributes.workflow.job.name",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "job.name.original" = { from = "jobs[\"*\"].name" },
           "job.name.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "copy",
       from = "attributes.jobs[\"*\"].status",
       to = "attributes.workflow.job.status",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "job.status.original" = { from = "jobs[\"*\"].status" },
           "job.status.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "copy",
       from = "attributes.jobs[\"*\"].duration",
       to = "attributes.workflow.job.duration",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "job.duration.original" = { from = "jobs[\"*\"].duration" },
           "job.duration.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     // Step level attributes with enhanced validation
     {
@@ -265,36 +265,36 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.jobs[\"*\"].steps[\"*\"].name",
       to = "attributes.workflow.step.name",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "step.name.original" = { from = "jobs[\"*\"].steps[\"*\"].name" },
           "step.name.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "copy",
       from = "attributes.jobs[\"*\"].steps[\"*\"].status",
       to = "attributes.workflow.step.status",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "step.status.original" = { from = "jobs[\"*\"].steps[\"*\"].status" },
           "step.status.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
     {
       type = "copy",
       from = "attributes.jobs[\"*\"].steps[\"*\"].duration",
       to = "attributes.workflow.step.duration",
       on_error = "drop",
-      output = {
-        attributes = {
+      output = [
+        {
           "step.duration.original" = { from = "jobs[\"*\"].steps[\"*\"].duration" },
           "step.duration.valid" = { value = true },
-        },
-      },
+        }
+      ],
     },
   ]
 
