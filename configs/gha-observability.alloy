@@ -274,21 +274,21 @@ otelcol.processor.transform "github_actions_transform" {
   metric_statements {
     context = "metric"
     statements = [
-      "set(name, \"workflow.duration\")",
-      "set(name, \"workflow.job.duration\")",
-      "set(name, \"workflow.step.duration\")",
-      "set(name, \"workflow.status\")",
-      "set(name, \"workflow.conclusion\")",
-      "set(name, \"workflow.job.status\")",
-      "set(name, \"workflow.step.status\")",
-      "set(gauge_value, attributes[\"duration\"])",
-      "set(gauge_value, attributes[\"workflow.status\"])",
-      "set(gauge_value, attributes[\"workflow.conclusion\"])",
-      "set(gauge_value, attributes[\"workflow.job.status\"])",
-      "set(gauge_value, attributes[\"workflow.step.status\"])",
-      "set(unit, \"s\")",
-      "set(attributes[\"workflow.name\"], attributes[\"workflow.name\"])",
-      "set(attributes[\"workflow.run_id\"], attributes[\"workflow.run_id\"])",
+      "set(metric.name, \"workflow.duration\")",
+      "set(metric.name, \"workflow.job.duration\")",
+      "set(metric.name, \"workflow.step.duration\")",
+      "set(metric.name, \"workflow.status\")",
+      "set(metric.name, \"workflow.conclusion\")",
+      "set(metric.name, \"workflow.job.status\")",
+      "set(metric.name, \"workflow.step.status\")",
+      "set(metric.gauge.value, metric.attributes[\"duration\"])",
+      "set(metric.gauge.value, metric.attributes[\"workflow.status\"])",
+      "set(metric.gauge.value, metric.attributes[\"workflow.conclusion\"])",
+      "set(metric.gauge.value, metric.attributes[\"workflow.job.status\"])",
+      "set(metric.gauge.value, metric.attributes[\"workflow.step.status\"])",
+      "set(metric.unit, \"s\")",
+      "set(metric.attributes[\"workflow.name\"], metric.attributes[\"workflow.name\"])",
+      "set(metric.attributes[\"workflow.run_id\"], metric.attributes[\"workflow.run_id\"])",
     ]
   }
 
