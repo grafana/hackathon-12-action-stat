@@ -264,33 +264,32 @@ otelcol.processor.transform "github_actions_transform" {
   log_statements {
     context = "log"
     statements = [
-      "set(log.attributes[\"workflow.job.name\"], log.attributes[\"job.name\"]) where log.attributes[\"job.name\"] != nil",
-      "set(log.attributes[\"workflow.job.id\"], log.attributes[\"job.id\"]) where log.attributes[\"job.id\"] != nil",
-      "set(log.attributes[\"workflow.step.name\"], log.attributes[\"step.name\"]) where log.attributes[\"step.name\"] != nil",
-      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"]) where log.attributes[\"step.number\"] != nil",
+      "set(log.attributes[\"workflow.job.name\"], log.attributes[\"job.name\"])",
+      "set(log.attributes[\"workflow.job.id\"], log.attributes[\"job.id\"])",
+      "set(log.attributes[\"workflow.step.name\"], log.attributes[\"step.name\"])",
+      "set(log.attributes[\"workflow.step.id\"], log.attributes[\"step.number\"])",
     ]
   }
 
   metric_statements {
     context = "datapoint"
     statements = [
-      "set(metric.name, \"workflow.duration\") where metric.attributes[\"workflow.name\"] != nil",
-      "set(metric.name, \"workflow.job.duration\") where metric.attributes[\"workflow.job.name\"] != nil",
-      "set(metric.name, \"workflow.step.duration\") where metric.attributes[\"workflow.step.name\"] != nil",
-      
-      "set(metric.value, ToDouble(metric.attributes[\"duration\"]) / 1000000000) where contains(metric.name, \"duration\")",
-      "set(metric.value, ToInt(metric.attributes[\"workflow.status\"])) where metric.name == \"workflow.status\"",
-      "set(metric.value, ToInt(metric.attributes[\"workflow.conclusion\"])) where metric.name == \"workflow.conclusion\"",
-      "set(metric.value, ToInt(metric.attributes[\"workflow.job.status\"])) where metric.name == \"workflow.job.status\"",
-      "set(metric.value, ToInt(metric.attributes[\"workflow.step.status\"])) where metric.name == \"workflow.step.status\"",
-      
-      "set(metric.unit, \"s\") where contains(metric.name, \"duration\")",
-      
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\"]) where metric.name == \"workflow.duration\"",
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\"]) where metric.name == \"workflow.status\"",
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\"]) where metric.name == \"workflow.conclusion\"",
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\"]) where contains(metric.name, \"workflow.job\")",
-      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\"]) where contains(metric.name, \"workflow.step\")",
+      "set(metric.name, \"workflow.duration\")",
+      "set(metric.name, \"workflow.job.duration\")",
+      "set(metric.name, \"workflow.step.duration\")",
+      "set(metric.name, \"workflow.status\")",
+      "set(metric.name, \"workflow.conclusion\")",
+      "set(metric.name, \"workflow.job.status\")",
+      "set(metric.name, \"workflow.step.status\")",
+      "set(metric.value, metric.attributes[\"duration\"])",
+      "set(metric.value, metric.attributes[\"workflow.status\"])",
+      "set(metric.value, metric.attributes[\"workflow.conclusion\"])",
+      "set(metric.value, metric.attributes[\"workflow.job.status\"])",
+      "set(metric.value, metric.attributes[\"workflow.step.status\"])",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\"])",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\"])",
+      "keep_keys(metric.attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\"])",
+      "set(metric.unit, \"s\")",
     ]
   }
 
