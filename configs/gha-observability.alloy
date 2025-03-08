@@ -33,7 +33,7 @@ otelcol.receiver.filelog "github_actions_logs" {
     "workflow.run_id" = env("WORKFLOW_RUN_ID"),
     "source" = "github_actions",
     "metric.source" = "logs",
-    "validation.enabled" = "true"  // Enable validation tracking
+    "validation.enabled" = "true",  // Enable validation tracking
   }
 
   operators = [
@@ -46,16 +46,16 @@ otelcol.receiver.filelog "github_actions_logs" {
       timestamp = {
         parse_from = "attributes.timestamp",
         layout_type = "strptime",
-        layout = "%Y-%m-%dT%H:%M:%S.%fZ"
+        layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       },
       output = {
         attributes = {
           "job.id" = { from = "job_id" },
           "step.number" = { from = "step_number" },
           "original.filename" = { from = "log.file.name" },
-          "parse.success" = { value = true }
-        }
-      }
+          "parse.success" = { value = true },
+        },
+      },
     },
     // Parse log line format with enhanced error handling and validation
     {
@@ -70,9 +70,9 @@ otelcol.receiver.filelog "github_actions_logs" {
           "timestamp" = { from = "timestamp" },
           "original.timestamp" = { from = "timestamp" },
           "original.body" = { from = "body" },
-          "parse.line.success" = { value = true }
-        }
-      }
+          "parse.line.success" = { value = true },
+        },
+      },
     },
     // Parse timestamp with strict validation and comprehensive error tracking
     {
@@ -86,9 +86,9 @@ otelcol.receiver.filelog "github_actions_logs" {
           "parsed_timestamp" = { from = "timestamp" },
           "timestamp.valid" = { value = true },
           "timestamp.format" = { value = "%Y-%m-%dT%H:%M:%S.%fZ" },
-          "parse.timestamp.success" = { value = true }
-        }
-      }
+          "parse.timestamp.success" = { value = true },
+        },
+      },
     },
   ]
 
@@ -116,185 +116,185 @@ otelcol.receiver.filelog "github_actions_metrics" {
   operators = [
     // First parse the entire body as JSON with enhanced validation
     {
-      type = "json_parser"
-      parse_from = "body"
-      parse_to = "attributes"
-      on_error = "drop"
+      type = "json_parser",
+      parse_from = "body",
+      parse_to = "attributes",
+      on_error = "drop",
       timestamp = {
-        parse_from = "attributes.createdAt"
-        layout_type = "strptime"
-        layout = "%Y-%m-%dT%H:%M:%S.%fZ"
-      }
+        parse_from = "attributes.createdAt",
+        layout_type = "strptime",
+        layout = "%Y-%m-%dT%H:%M:%S.%fZ",
+      },
       output = {
         attributes = {
           "original.body" = { from = "body" },
           "parse.json.success" = { value = true },
           "validation.timestamp" = { from = "createdAt" },
-        }
-      }
+        },
+      },
     },
     // Then parse timestamp with strict validation and error tracking
     {
-      type = "time_parser"
-      parse_from = "attributes.createdAt"
-      layout_type = "strptime"
-      layout = "%Y-%m-%dT%H:%M:%S.%fZ"
-      on_error = "drop"
+      type = "time_parser",
+      parse_from = "attributes.createdAt",
+      layout_type = "strptime",
+      layout = "%Y-%m-%dT%H:%M:%S.%fZ",
+      on_error = "drop",
       output = {
         attributes = {
           "parsed_timestamp" = { from = "createdAt" },
           "timestamp.valid" = { value = true },
           "timestamp.format" = { value = "%Y-%m-%dT%H:%M:%S.%fZ" },
           "parse.timestamp.success" = { value = true },
-        }
-      }
+        },
+      },
     },
     // Workflow level attributes with enhanced validation
     {
-      type = "move"
-      from = "attributes.workflowName"
-      to = "attributes.workflow.name"
-      on_error = "drop"
+      type = "move",
+      from = "attributes.workflowName",
+      to = "attributes.workflow.name",
+      on_error = "drop",
       output = {
         attributes = {
           "workflow.name.original" = { from = "workflowName" },
           "workflow.name.valid" = { value = true },
-        }
-      }
+        },
+      },
     },
     {
-      type = "move"
-      from = "attributes.workflowDatabaseId"
-      to = "attributes.workflow.id"
-      on_error = "drop"
+      type = "move",
+      from = "attributes.workflowDatabaseId",
+      to = "attributes.workflow.id",
+      on_error = "drop",
       output = {
         attributes = {
           "workflow.id.original" = { from = "workflowDatabaseId" },
-          "workflow.id.valid" = { value = true }
-        }
-      }
+          "workflow.id.valid" = { value = true },
+        },
+      },
     },
     {
-      type = "move"
-      from = "attributes.databaseId"
-      to = "attributes.run.id"
-      on_error = "drop"
+      type = "move",
+      from = "attributes.databaseId",
+      to = "attributes.run.id",
+      on_error = "drop",
       output = {
         attributes = {
           "run.id.original" = { from = "databaseId" },
-          "run.id.valid" = { value = true }
-        }
-      }
+          "run.id.valid" = { value = true },
+        },
+      },
     },
     {
-      type = "move"
-      from = "attributes.status"
-      to = "attributes.run.status"
-      on_error = "drop"
+      type = "move",
+      from = "attributes.status",
+      to = "attributes.run.status",
+      on_error = "drop",
       output = {
         attributes = {
           "run.status.original" = { from = "status" },
-          "run.status.valid" = { value = true }
-        }
-      }
+          "run.status.valid" = { value = true },
+        },
+      },
     },
     {
-      type = "move"
-      from = "attributes.conclusion"
-      to = "attributes.run.conclusion"
-      on_error = "drop"
+      type = "move",
+      from = "attributes.conclusion",
+      to = "attributes.run.conclusion",
+      on_error = "drop",
       output = {
         attributes = {
           "run.conclusion.original" = { from = "conclusion" },
-          "run.conclusion.valid" = { value = true }
-        }
-      }
+          "run.conclusion.valid" = { value = true },
+        },
+      },
     },
     {
-      type = "move"
-      from = "attributes.duration"
-      to = "attributes.workflow.duration"
-      on_error = "drop"
+      type = "move",
+      from = "attributes.duration",
+      to = "attributes.workflow.duration",
+      on_error = "drop",
       output = {
         attributes = {
           "workflow.duration.original" = { from = "duration" },
-          "workflow.duration.valid" = { value = true }
-        }
-      }
+          "workflow.duration.valid" = { value = true },
+        },
+      },
     },
     // Job level attributes with enhanced validation
     {
-      type = "copy"
-      from = "attributes.jobs[\"*\"].name"
-      to = "attributes.workflow.job.name"
-      on_error = "drop"
+      type = "copy",
+      from = "attributes.jobs[\"*\"].name",
+      to = "attributes.workflow.job.name",
+      on_error = "drop",
       output = {
         attributes = {
           "job.name.original" = { from = "jobs[\"*\"].name" },
-          "job.name.valid" = { value = true }
-        }
-      }
+          "job.name.valid" = { value = true },
+        },
+      },
     },
     {
-      type = "copy"
-      from = "attributes.jobs[\"*\"].status"
-      to = "attributes.workflow.job.status"
-      on_error = "drop"
+      type = "copy",
+      from = "attributes.jobs[\"*\"].status",
+      to = "attributes.workflow.job.status",
+      on_error = "drop",
       output = {
         attributes = {
           "job.status.original" = { from = "jobs[\"*\"].status" },
-          "job.status.valid" = { value = true }
-        }
-      }
+          "job.status.valid" = { value = true },
+        },
+      },
     },
     {
-      type = "copy"
-      from = "attributes.jobs[\"*\"].duration"
-      to = "attributes.workflow.job.duration"
-      on_error = "drop"
+      type = "copy",
+      from = "attributes.jobs[\"*\"].duration",
+      to = "attributes.workflow.job.duration",
+      on_error = "drop",
       output = {
         attributes = {
           "job.duration.original" = { from = "jobs[\"*\"].duration" },
-          "job.duration.valid" = { value = true }
-        }
-      }
+          "job.duration.valid" = { value = true },
+        },
+      },
     },
     // Step level attributes with enhanced validation
     {
-      type = "copy"
-      from = "attributes.jobs[\"*\"].steps[\"*\"].name"
-      to = "attributes.workflow.step.name"
-      on_error = "drop"
+      type = "copy",
+      from = "attributes.jobs[\"*\"].steps[\"*\"].name",
+      to = "attributes.workflow.step.name",
+      on_error = "drop",
       output = {
         attributes = {
           "step.name.original" = { from = "jobs[\"*\"].steps[\"*\"].name" },
-          "step.name.valid" = { value = true }
-        }
-      }
+          "step.name.valid" = { value = true },
+        },
+      },
     },
     {
-      type = "copy"
-      from = "attributes.jobs[\"*\"].steps[\"*\"].status"
-      to = "attributes.workflow.step.status"
-      on_error = "drop"
+      type = "copy",
+      from = "attributes.jobs[\"*\"].steps[\"*\"].status",
+      to = "attributes.workflow.step.status",
+      on_error = "drop",
       output = {
         attributes = {
           "step.status.original" = { from = "jobs[\"*\"].steps[\"*\"].status" },
-          "step.status.valid" = { value = true }
-        }
-      }
+          "step.status.valid" = { value = true },
+        },
+      },
     },
     {
-      type = "copy"
-      from = "attributes.jobs[\"*\"].steps[\"*\"].duration"
-      to = "attributes.workflow.step.duration"
-      on_error = "drop"
+      type = "copy",
+      from = "attributes.jobs[\"*\"].steps[\"*\"].duration",
+      to = "attributes.workflow.step.duration",
+      on_error = "drop",
       output = {
         attributes = {
           "step.duration.original" = { from = "jobs[\"*\"].steps[\"*\"].duration" },
-          "step.duration.valid" = { value = true }
-        }
-      }
+          "step.duration.valid" = { value = true },
+        },
+      },
     },
   ]
 
@@ -324,65 +324,65 @@ otelcol.processor.transform "github_actions_transform" {
   log_statements {
     context = "log"
     statements = [
-      "set(attributes[\"validation.state\"], \"checking_resource_attributes\")"
-      "set(attributes[\"error\"], \"missing_workflow_name\") where resource.attributes[\"workflow.name\"] == nil"
-      "set(attributes[\"error\"], \"missing_workflow_run_id\") where attributes[\"error\"] == nil and resource.attributes[\"workflow.run_id\"] == nil"
+      "set(attributes[\"validation.state\"], \"checking_resource_attributes\")",
+      "set(attributes[\"error\"], \"missing_workflow_name\") where resource.attributes[\"workflow.name\"] == nil",
+      "set(attributes[\"error\"], \"missing_workflow_run_id\") where attributes[\"error\"] == nil and resource.attributes[\"workflow.run_id\"] == nil",
       
-      "set(attributes[\"validation.state\"], \"checking_input_attributes\")"
-      "set(attributes[\"error\"], \"missing_required_attributes\") where attributes[\"error\"] == nil and (attributes[\"timestamp.valid\"] == nil or attributes[\"parsed_timestamp\"] == nil)"
+      "set(attributes[\"validation.state\"], \"checking_input_attributes\")",
+      "set(attributes[\"error\"], \"missing_required_attributes\") where attributes[\"error\"] == nil and (attributes[\"timestamp.valid\"] == nil or attributes[\"parsed_timestamp\"] == nil)",
       
-      "set(attributes[\"validation.state\"], \"normalizing_fields\")"
-      "set(attributes[\"error\"], \"invalid_job_name\") where attributes[\"job_name\"] != nil and Convert(attributes[\"job_name\"], \"string\") == nil"
-      "set(attributes[\"error\"], \"invalid_step_name\") where attributes[\"step_name\"] != nil and Convert(attributes[\"step_name\"], \"string\") == nil"
-      "set(attributes[\"workflow.job.name\"], Convert(attributes[\"job_name\"], \"string\")) where attributes[\"error\"] == nil and attributes[\"job_name\"] != nil"
-      "set(attributes[\"workflow.job.id\"], Convert(attributes[\"job_id\"], \"string\")) where attributes[\"error\"] == nil and attributes[\"job_id\"] != nil"
-      "set(attributes[\"workflow.step.name\"], Convert(attributes[\"step_name\"], \"string\")) where attributes[\"error\"] == nil and attributes[\"step_name\"] != nil and attributes[\"step_name\"] != \"\""
-      "set(attributes[\"workflow.step.id\"], Convert(attributes[\"step_number\"], \"string\")) where attributes[\"error\"] == nil and attributes[\"step_number\"] != nil and attributes[\"step_number\"] != \"\""
+      "set(attributes[\"validation.state\"], \"normalizing_fields\")",
+      "set(attributes[\"error\"], \"invalid_job_name\") where attributes[\"job_name\"] != nil and Convert(attributes[\"job_name\"], \"string\") == nil",
+      "set(attributes[\"error\"], \"invalid_step_name\") where attributes[\"step_name\"] != nil and Convert(attributes[\"step_name\"], \"string\") == nil",
+      "set(attributes[\"workflow.job.name\"], Convert(attributes[\"job_name\"], \"string\")) where attributes[\"error\"] == nil and attributes[\"job_name\"] != nil",
+      "set(attributes[\"workflow.job.id\"], Convert(attributes[\"job_id\"], \"string\")) where attributes[\"error\"] == nil and attributes[\"job_id\"] != nil",
+      "set(attributes[\"workflow.step.name\"], Convert(attributes[\"step_name\"], \"string\")) where attributes[\"error\"] == nil and attributes[\"step_name\"] != nil and attributes[\"step_name\"] != \"\"",
+      "set(attributes[\"workflow.step.id\"], Convert(attributes[\"step_number\"], \"string\")) where attributes[\"error\"] == nil and attributes[\"step_number\"] != nil and attributes[\"step_number\"] != \"\"",
     ]
   }
 
   metric_statements {
     context = "datapoint"
     statements = [
-      "set(attributes[\"validation.state\"], \"setting_metric_properties\")"
-      "set(aggregation_temporality, 1)"
-      "set(metric_type, 2)"
+      "set(attributes[\"validation.state\"], \"setting_metric_properties\")",
+      "set(aggregation_temporality, 1)",
+      "set(metric_type, 2)",
       
-      "set(attributes[\"validation.state\"], \"validating_metrics\")"
-      "set(attributes[\"error\"], \"missing_workflow_name\") where attributes[\"workflow.name\"] == nil"
-      "set(attributes[\"error\"], \"missing_duration\") where attributes[\"error\"] == nil and contains(name, \"duration\") and attributes[\"duration\"] == nil"
-      "set(attributes[\"error\"], \"invalid_duration\") where attributes[\"error\"] == nil and contains(name, \"duration\") and (Convert(attributes[\"duration\"], \"int\") == nil or Convert(attributes[\"duration\"], \"int\") < 0)"
+      "set(attributes[\"validation.state\"], \"validating_metrics\")",
+      "set(attributes[\"error\"], \"missing_workflow_name\") where attributes[\"workflow.name\"] == nil",
+      "set(attributes[\"error\"], \"missing_duration\") where attributes[\"error\"] == nil and contains(name, \"duration\") and attributes[\"duration\"] == nil",
+      "set(attributes[\"error\"], \"invalid_duration\") where attributes[\"error\"] == nil and contains(name, \"duration\") and (Convert(attributes[\"duration\"], \"int\") == nil or Convert(attributes[\"duration\"], \"int\") < 0)",
       
-      "set(attributes[\"validation.state\"], \"validating_duration_metrics\")"
-      "set(attributes[\"error\"], \"invalid_duration_value\") where attributes[\"error\"] == nil and attributes[\"duration\"] != nil and (Convert(attributes[\"duration\"], \"int\") == nil or Convert(attributes[\"duration\"], \"int\") < 0)"
+      "set(attributes[\"validation.state\"], \"validating_duration_metrics\")",
+      "set(attributes[\"error\"], \"invalid_duration_value\") where attributes[\"error\"] == nil and attributes[\"duration\"] != nil and (Convert(attributes[\"duration\"], \"int\") == nil or Convert(attributes[\"duration\"], \"int\") < 0)",
       
-      "set(attributes[\"validation.state\"], \"setting_metric_names\")"
-      "set(name, \"workflow.duration\") where attributes[\"error\"] == nil and attributes[\"duration\"] != nil and attributes[\"workflow.name\"] != nil and Convert(attributes[\"duration\"], \"int\") >= 0"
-      "set(name, \"workflow.job.duration\") where attributes[\"error\"] == nil and attributes[\"duration\"] != nil and attributes[\"workflow.job.name\"] != nil and Convert(attributes[\"duration\"], \"int\") >= 0"
-      "set(name, \"workflow.step.duration\") where attributes[\"error\"] == nil and attributes[\"duration\"] != nil and attributes[\"workflow.step.name\"] != nil and Convert(attributes[\"duration\"], \"int\") >= 0"
+      "set(attributes[\"validation.state\"], \"setting_metric_names\")",
+      "set(name, \"workflow.duration\") where attributes[\"error\"] == nil and attributes[\"duration\"] != nil and attributes[\"workflow.name\"] != nil and Convert(attributes[\"duration\"], \"int\") >= 0",
+      "set(name, \"workflow.job.duration\") where attributes[\"error\"] == nil and attributes[\"duration\"] != nil and attributes[\"workflow.job.name\"] != nil and Convert(attributes[\"duration\"], \"int\") >= 0",
+      "set(name, \"workflow.step.duration\") where attributes[\"error\"] == nil and attributes[\"duration\"] != nil and attributes[\"workflow.step.name\"] != nil and Convert(attributes[\"duration\"], \"int\") >= 0",
       
-      "set(attributes[\"validation.state\"], \"setting_metric_values\")"
-      "set(value_double, Divide(Convert(attributes[\"duration\"], \"int\"), 1000000000)) where contains(name, \"duration\") and Convert(attributes[\"duration\"], \"int\") >= 0"
-      "set(value_int, Convert(attributes[\"workflow.status\"], \"int\")) where name == \"workflow.status\""
-      "set(value_int, Convert(attributes[\"workflow.conclusion\"], \"int\")) where name == \"workflow.conclusion\""
-      "set(value_int, Convert(attributes[\"workflow.job.status\"], \"int\")) where name == \"workflow.job.status\""
-      "set(value_int, Convert(attributes[\"workflow.step.status\"], \"int\")) where name == \"workflow.step.status\""
+      "set(attributes[\"validation.state\"], \"setting_metric_values\")",
+      "set(value_double, Divide(Convert(attributes[\"duration\"], \"int\"), 1000000000)) where contains(name, \"duration\") and Convert(attributes[\"duration\"], \"int\") >= 0",
+      "set(value_int, Convert(attributes[\"workflow.status\"], \"int\")) where name == \"workflow.status\"",
+      "set(value_int, Convert(attributes[\"workflow.conclusion\"], \"int\")) where name == \"workflow.conclusion\"",
+      "set(value_int, Convert(attributes[\"workflow.job.status\"], \"int\")) where name == \"workflow.job.status\"",
+      "set(value_int, Convert(attributes[\"workflow.step.status\"], \"int\")) where name == \"workflow.step.status\"",
       
-      "set(attributes[\"validation.state\"], \"setting_metadata\")"
-      "set(unit, \"s\") where contains(name, \"duration\")"
-      "set(description, \"Duration of workflow execution in seconds\") where name == \"workflow.duration\""
-      "set(description, \"Duration of job execution in seconds\") where name == \"workflow.job.duration\""
-      "set(description, \"Duration of step execution in seconds\") where name == \"workflow.step.duration\""
-      "set(description, \"Current workflow status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.status\""
-      "set(description, \"Workflow conclusion (0=failed, 1=success, 3=cancelled, 4=skipped)\") where name == \"workflow.conclusion\""
-      "set(description, \"Current job status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.job.status\""
-      "set(description, \"Current step status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.step.status\""
+      "set(attributes[\"validation.state\"], \"setting_metadata\")",
+      "set(unit, \"s\") where contains(name, \"duration\")",
+      "set(description, \"Duration of workflow execution in seconds\") where name == \"workflow.duration\"",
+      "set(description, \"Duration of job execution in seconds\") where name == \"workflow.job.duration\"",
+      "set(description, \"Duration of step execution in seconds\") where name == \"workflow.step.duration\"",
+      "set(description, \"Current workflow status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.status\"",
+      "set(description, \"Workflow conclusion (0=failed, 1=success, 3=cancelled, 4=skipped)\") where name == \"workflow.conclusion\"",
+      "set(description, \"Current job status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.job.status\"",
+      "set(description, \"Current step status (0=failed, 1=success, 2=in_progress, 3=cancelled, 4=skipped)\") where name == \"workflow.step.status\"",
       
-      "set(attributes[\"validation.state\"], \"final_cleanup\")"
-      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where name == \"workflow.duration\" or name == \"workflow.status\" or name == \"workflow.conclusion\""
-      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"error\"]) where contains(name, \"workflow.job\")"
-      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\", \"error\"]) where contains(name, \"workflow.step\")"
-      "delete_key(attributes, \"validation.state\")"
+      "set(attributes[\"validation.state\"], \"final_cleanup\")",
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\", \"error\"]) where name == \"workflow.duration\" or name == \"workflow.status\" or name == \"workflow.conclusion\"",
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"error\"]) where contains(name, \"workflow.job\")",
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\", \"workflow.job.name\", \"workflow.job.id\", \"workflow.step.name\", \"workflow.step.id\", \"error\"]) where contains(name, \"workflow.step\")",
+      "delete_key(attributes, \"validation.state\")",
     ]
   }
 
