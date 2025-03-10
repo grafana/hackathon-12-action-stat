@@ -43,11 +43,6 @@ otelcol.receiver.filelog "github_actions_logs" {
       parse_from = "attributes[\"log.file.name\"]",
       regex = "^job-(?P<job_id>[0-9]+)(?:-step-(?P<step_number>[0-9]+))?\\.log$",
       on_error = "drop",
-      timestamp = {
-        parse_from = "attributes.timestamp",
-        layout_type = "strptime",
-        layout = "%Y-%m-%dT%H:%M:%S.%fZ",
-      },
       parse_to = "attributes",
     },
     // Parse log line format with enhanced error handling and validation
