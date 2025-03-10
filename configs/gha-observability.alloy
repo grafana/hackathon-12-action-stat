@@ -49,7 +49,7 @@ otelcol.receiver.filelog "github_actions_logs" {
     {
       type = "regex_parser",
       parse_from = "body",
-      regex = "^(?P<job_name>[^\\s]+)\\s+\\/\\s+(?P<step_name>[^\\s]+)\\s+[^\\s]+\\s+(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+Z)\\s+.*$",
+      regex = "^(?P<job_name>[^\\t]+)\\t(?P<step_name>[^\\t]+)\\t(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+Z)\\t.*$",
       on_error = "drop",
       parse_to = "attributes",
     },
