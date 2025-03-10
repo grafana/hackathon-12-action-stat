@@ -272,26 +272,26 @@ otelcol.processor.transform "github_actions_transform" {
   }
 
   metric_statements {
-    context = "metric"
+    context = "datapoint"
     statements = [
-      "set(name, \"workflow.duration\")",
-      "set(value, Float(attributes[\"workflow.duration\"]) / 1000000000)",
-      "set(unit, \"s\")",
-      "set(name, \"workflow.job.duration\")",
-      "set(value, Float(attributes[\"workflow.job.duration\"]) / 1000000000)",
-      "set(unit, \"s\")",
-      "set(name, \"workflow.step.duration\")",
-      "set(value, Float(attributes[\"workflow.step.duration\"]) / 1000000000)",
-      "set(unit, \"s\")",
-      "set(name, \"workflow.status\")",
-      "set(value, attributes[\"workflow.status\"])",
-      "set(name, \"workflow.conclusion\")",
-      "set(value, attributes[\"workflow.conclusion\"])",
-      "set(name, \"workflow.job.status\")",
-      "set(value, attributes[\"workflow.job.status\"])",
-      "set(name, \"workflow.step.status\")",
-      "set(value, attributes[\"workflow.step.status\"])",
-      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\"])",
+      "set(metric.name, \"workflow.duration\")",
+      "set(datapoint.value_double, Float(datapoint.attributes[\"workflow.duration\"]) / 1000000000)",
+      "set(metric.unit, \"s\")",
+      "set(metric.name, \"workflow.job.duration\")",
+      "set(datapoint.value_double, Float(datapoint.attributes[\"workflow.job.duration\"]) / 1000000000)",
+      "set(metric.unit, \"s\")",
+      "set(metric.name, \"workflow.step.duration\")",
+      "set(datapoint.value_double, Float(datapoint.attributes[\"workflow.step.duration\"]) / 1000000000)",
+      "set(metric.unit, \"s\")",
+      "set(metric.name, \"workflow.status\")",
+      "set(datapoint.value_double, datapoint.attributes[\"workflow.status\"])",
+      "set(metric.name, \"workflow.conclusion\")",
+      "set(datapoint.value_double, datapoint.attributes[\"workflow.conclusion\"])",
+      "set(metric.name, \"workflow.job.status\")",
+      "set(datapoint.value_double, datapoint.attributes[\"workflow.job.status\"])",
+      "set(metric.name, \"workflow.step.status\")",
+      "set(datapoint.value_double, datapoint.attributes[\"workflow.step.status\"])",
+      "keep_keys(datapoint.attributes, [\"workflow.name\", \"workflow.run_id\"])",
     ]
   }
 
