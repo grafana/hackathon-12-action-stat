@@ -262,7 +262,7 @@ otelcol.processor.transform "github_actions_transform" {
       "set(attributes[\"workflow.job.name\"], attributes[\"job.name\"])",
       "set(attributes[\"workflow.job.id\"], attributes[\"job.id\"])",
       "set(attributes[\"workflow.step.name\"], attributes[\"step.name\"])",
-      "set(attributes[\"workflow.step.id\"], attributes[\"step.number\"])"
+      "set(attributes[\"workflow.step.id\"], attributes[\"step.number\"])",
     ]
   }
 
