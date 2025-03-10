@@ -267,7 +267,7 @@ otelcol.processor.transform "github_actions_transform" {
       "set(attributes[\"workflow.job.name\"], attributes[\"job.name\"])",
       "set(attributes[\"workflow.job.id\"], attributes[\"job.id\"])",
       "set(attributes[\"workflow.step.name\"], attributes[\"step.name\"])",
-      "set(attributes[\"workflow.step.id\"], attributes[\"step.number\"])",
+      "set(attributes[\"workflow.step.id\"], attributes[\"step.number\"])"
     ]
   }
 
@@ -275,19 +275,23 @@ otelcol.processor.transform "github_actions_transform" {
     context = "metric"
     statements = [
       "set(name, \"workflow.duration\")",
-      "set(name, \"workflow.job.duration\")",
-      "set(name, \"workflow.step.duration\")",
-      "set(name, \"workflow.status\")",
-      "set(name, \"workflow.conclusion\")",
-      "set(name, \"workflow.job.status\")",
-      "set(name, \"workflow.step.status\")",
-      "set(data_point[0].value, attributes[\"duration\"])",
-      "set(data_point[0].value, attributes[\"workflow.status\"])",
-      "set(data_point[0].value, attributes[\"workflow.conclusion\"])",
-      "set(data_point[0].value, attributes[\"workflow.job.status\"])",
-      "set(data_point[0].value, attributes[\"workflow.step.status\"])",
+      "set(value, Float(attributes[\"workflow.duration\"]) / 1000000000)",
       "set(unit, \"s\")",
-      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\"])",
+      "set(name, \"workflow.job.duration\")",
+      "set(value, Float(attributes[\"workflow.job.duration\"]) / 1000000000)",
+      "set(unit, \"s\")",
+      "set(name, \"workflow.step.duration\")",
+      "set(value, Float(attributes[\"workflow.step.duration\"]) / 1000000000)",
+      "set(unit, \"s\")",
+      "set(name, \"workflow.status\")",
+      "set(value, attributes[\"workflow.status\"])",
+      "set(name, \"workflow.conclusion\")",
+      "set(value, attributes[\"workflow.conclusion\"])",
+      "set(name, \"workflow.job.status\")",
+      "set(value, attributes[\"workflow.job.status\"])",
+      "set(name, \"workflow.step.status\")",
+      "set(value, attributes[\"workflow.step.status\"])",
+      "keep_keys(attributes, [\"workflow.name\", \"workflow.run_id\"])"
     ]
   }
 
