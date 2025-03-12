@@ -48,13 +48,18 @@ while true; do
   # Check if timeout reached
   if [[ $((SECONDS - START_TIME)) -ge "${UPLOAD_TIMEOUT}" ]]; then
     echo "Timeout reached after ${UPLOAD_TIMEOUT} seconds. Killing Alloy process."
+    LOGS_FILE_COUNT=$(find "${LOGS_DIRECTORY}" -type f | wc -l) || true
+    METRICS_FILE_COUNT=$(find "${METRICS_DIRECTORY}" -type f | wc -l) || true
+    echo "Log files unprocessed: ${LOGS_FILE_COUNT}"
+    echo "Metrics files unprocessed: ${METRICS_FILE_COUNT}"
     kill "${ALLOY_PID}" || true
     return 1
   fi
 
-  # Check if log directory is empty
-  if [[ -z "$(ls -A "${LOGS_DIRECTORY}" || true)" ]]; then
+  # Check if logs and metrics directories are empty
+  if [[ -z "$(ls -A "${LOGS_DIRECTORY}" || true)" ]] && [[ -z "$(ls -A "${METRICS_DIRECTORY}" || true)" ]]; then
     kill "${ALLOY_PID}" || true
     break
   fi
 done
+

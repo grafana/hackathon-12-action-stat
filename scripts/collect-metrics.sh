@@ -12,6 +12,8 @@ if [[ -z "${METRICS_DIRECTORY:-}" ]]; then
     exit 1
 fi
 
+WORKFLOW_NAME=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowName -q .workflowName)
+
 # Create metrics directory if it doesn't exist
 mkdir -p "${METRICS_DIRECTORY}"
 
@@ -84,4 +86,12 @@ if command -v jq >/dev/null 2>&1; then
     fi
 fi
 
-echo "Metrics collected and saved to ${METRICS_DIRECTORY}/workflow-${WORKFLOW_RUN_ID}.json" 
+  # Print confirmation
+  METRICS_FILE_COUNT=$(find "${METRICS_DIRECTORY}" -type f | wc -l) || true
+  if [[ "${METRICS_FILE_COUNT}" -gt 0 ]]; then
+    echo "Successfully processed workflow logs: ${METRICS_FILE_COUNT} files written to ${METRICS_DIRECTORY}"
+    echo "Workflow Name: ${WORKFLOW_NAME}"
+    echo "Workflow Run ID: ${WORKFLOW_RUN_ID}"
+  else
+    echo -e "\033[33mWarning: No log files were created in ${METRICS_DIRECTORY}\033[0m"
+  fi

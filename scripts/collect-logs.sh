@@ -120,9 +120,11 @@ function main() {
   done
 
   # Print confirmation
-  FILE_COUNT=$(find "${LOGS_DIRECTORY}" -type f | wc -l) || true
-  if [[ "${FILE_COUNT}" -gt 0 ]]; then
-    echo "Successfully processed workflow logs: ${FILE_COUNT} files written to ${LOGS_DIRECTORY}"
+  LOGS_FILE_COUNT=$(find "${LOGS_DIRECTORY}" -type f | wc -l) || true
+  if [[ "${LOGS_FILE_COUNT}" -gt 0 ]]; then
+    echo "Successfully processed workflow logs: ${LOGS_FILE_COUNT} files written to ${LOGS_DIRECTORY}"
+    echo "Workflow Name: ${WORKFLOW_NAME}"
+    echo "Workflow Run ID: ${WORKFLOW_RUN_ID}"
   else
     echo -e "\033[33mWarning: No log files were created in ${LOGS_DIRECTORY}\033[0m"
   fi
