@@ -8,12 +8,14 @@ echo "Version: $(cat /version)"
 git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 cd "${GITHUB_WORKSPACE}"
 
-# Get workflow logs
-/usr/local/bin/collect-logs.sh
 
 export GITHUB_REPOSITORY=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 export WORKFLOW_ID=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowDatabaseId -q .workflowDatabaseId)
 export WORKFLOW_NAME=$(gh run view "${WORKFLOW_RUN_ID}" --json workflowName -q .workflowName)
+
+# Get workflow logs and metrics
+/usr/local/bin/collect-logs.sh
+/usr/local/bin/collect-metrics.sh
 
 if [[ -z "${TELEMETRY_URL:-}" ]]; then
   echo "TELEMETRY_URL is not set!"
