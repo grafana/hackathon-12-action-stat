@@ -27,7 +27,7 @@ otelcol.receiver.filelog "github_actions_logs" {
   delete_after_read = true
   
   debug_metrics {
-    enabled = true,
+    enabled = true
   }
   
   resource = {
