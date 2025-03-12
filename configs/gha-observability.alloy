@@ -27,7 +27,8 @@ otelcol.receiver.filelog "github_actions_logs" {
   delete_after_read = true
   
   debug_metrics {
-    enabled = true
+    disable_high_cardinality_metrics = true
+    level = "detailed"
   }
   
   resource = {
@@ -79,6 +80,11 @@ otelcol.receiver.filelog "github_actions_metrics" {
   start_at = "beginning"
   delete_after_read = true
   
+  debug_metrics {
+    disable_high_cardinality_metrics = true
+    level = "detailed"
+  }
+
   resource = {
     "service.name" = "github_actions",
     "service.namespace" = env("GITHUB_REPOSITORY"),
@@ -316,8 +322,4 @@ otelcol.auth.basic "destination" {
   password = env("TELEMETRY_PASSWORD")
 }
 
-logging {
-  level  = "debug"
-  format = "logfmt"
-  development = true
-} 
+otel.exporter.debug "default" {}
