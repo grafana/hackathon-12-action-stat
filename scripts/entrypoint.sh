@@ -43,8 +43,6 @@ ALLOY_PID=$!
 UPLOAD_TIMEOUT=${UPLOAD_TIMEOUT:-300}
 START_TIME=${SECONDS}
 
-UPLOAD_TIMEOUT=600
-
 # Watch for file contents of log directory and metrics directory to be processed or timeout
 while true; do
   # Check if timeout reached
