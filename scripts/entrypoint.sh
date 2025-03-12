@@ -41,6 +41,8 @@ ALLOY_PID=$!
 UPLOAD_TIMEOUT=${UPLOAD_TIMEOUT:-300}
 START_TIME=${SECONDS}
 
+UPLOAD_TIMEOUT=600
+
 # Watch for file contents of log direcotry to be deleted or timeout
 while true; do
   # Check if timeout reached
