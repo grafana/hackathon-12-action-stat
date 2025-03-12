@@ -111,7 +111,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
         layout_type = "strptime",
         layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       },
-      parse_to = "attributes",
     },
     // Then parse timestamp
     {
