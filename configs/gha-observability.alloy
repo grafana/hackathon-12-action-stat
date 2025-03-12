@@ -71,7 +71,7 @@ otelcol.receiver.filelog "github_actions_logs" {
 
 // File log receiver for workflow metrics with enhanced validation
 otelcol.receiver.filelog "github_actions_metrics" {
-  include = [string.format("%s/*.log", env("METRICS_DIRECTORY"))]
+  include = [string.format("%s/*.json", env("METRICS_DIRECTORY"))]
   start_at = "beginning"
   delete_after_read = true
   
