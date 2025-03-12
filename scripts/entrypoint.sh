@@ -45,7 +45,7 @@ START_TIME=${SECONDS}
 
 UPLOAD_TIMEOUT=600
 
-# Watch for file contents of log direcotry to be deleted or timeout
+# Watch for file contents of log directory and metrics directory to be processed or timeout
 while true; do
   # Check if timeout reached
   if [[ $((SECONDS - START_TIME)) -ge "${UPLOAD_TIMEOUT}" ]]; then
@@ -55,11 +55,32 @@ while true; do
     echo "Log files unprocessed: ${LOGS_FILE_COUNT}"
     echo "Metrics files unprocessed: ${METRICS_FILE_COUNT}"
     kill "${ALLOY_PID}" || true
-    return 1
+    exit 1
   fi
 
-  # Check if logs and metrics directories are empty
-  if [[ -z "$(ls -A "${LOGS_DIRECTORY}" || true)" ]] && [[ -z "$(ls -A "${METRICS_DIRECTORY}" || true)" ]]; then
+  # Check logs and metrics directories separately for better progress tracking
+  LOGS_EMPTY=false
+  METRICS_EMPTY=false
+  
+  if [[ -z "$(ls -A "${LOGS_DIRECTORY}" || true)" ]]; then
+   LOGS_EMPTY=true
+  fi
+  
+  if [[ -z "$(ls -A "${METRICS_DIRECTORY}" || true)" ]]; then
+    METRICS_EMPTY=true
+  fi
+
+  # Print progress if either directory still has files
+  if ! "${LOGS_EMPTY}" || ! "${METRICS_EMPTY}"; then
+    LOGS_COUNT=$(find "${LOGS_DIRECTORY}" -type f | wc -l) || true
+    METRICS_COUNT=$(find "${METRICS_DIRECTORY}" -type f | wc -l) || true
+    echo "Processing... Remaining files - Logs: ${LOGS_COUNT}, Metrics: ${METRICS_COUNT}"
+    sleep 10  # Add a small delay to prevent too frequent checking
+  fi
+
+  # Break if both directories are empty
+  if "${LOGS_EMPTY}" && "${METRICS_EMPTY}"; then
+    echo "All files processed successfully"
     kill "${ALLOY_PID}" || true
     break
   fi
