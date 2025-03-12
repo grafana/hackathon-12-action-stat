@@ -318,6 +318,7 @@ otelcol.processor.transform "github_actions_transform" {
   }
 
   output {
+    logs = [otelcol.exporter.otlphttp.destination.input]
     metrics = [otelcol.exporter.otlphttp.destination.input]
   }
 }
