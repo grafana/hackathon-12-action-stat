@@ -25,7 +25,10 @@ otelcol.receiver.filelog "github_actions_logs" {
   include = [string.format("%s/*.log", env("LOGS_DIRECTORY"))]
   start_at = "beginning"
   delete_after_read = true
-  debug_metrics = true
+  
+  debug_metrics {
+    enabled = true,
+  }
   
   resource = {
     "service.name" = "github_actions",
@@ -315,6 +318,6 @@ otelcol.auth.basic "destination" {
 
 logging {
   level  = "debug"
-  format = "text"
+  format = "logfmt"
   development = true
 } 
