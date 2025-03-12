@@ -87,11 +87,11 @@ if command -v jq >/dev/null 2>&1; then
 fi
 
   # Print confirmation
+  echo "Workflow Name: ${WORKFLOW_NAME}"
+  echo "Workflow Run ID: ${WORKFLOW_RUN_ID}"
   METRICS_FILE_COUNT=$(find "${METRICS_DIRECTORY}" -type f | wc -l) || true
   if [[ "${METRICS_FILE_COUNT}" -gt 0 ]]; then
-    echo "Successfully processed workflow logs: ${METRICS_FILE_COUNT} files written to ${METRICS_DIRECTORY}"
-    echo "Workflow Name: ${WORKFLOW_NAME}"
-    echo "Workflow Run ID: ${WORKFLOW_RUN_ID}"
+    echo "Successfully processed workflow metrics: ${METRICS_FILE_COUNT} file(s) written to ${METRICS_DIRECTORY}"
   else
     echo -e "\033[33mWarning: No log files were created in ${METRICS_DIRECTORY}\033[0m"
   fi
