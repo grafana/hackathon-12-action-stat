@@ -34,9 +34,9 @@ if command -v jq >/dev/null 2>&1; then
         . + {
             duration: (
                 if .updatedAt != null then
-                    (fromdateiso8601(.updatedAt) - fromdateiso8601(.createdAt))
+                    ((.updatedAt | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) - (.createdAt | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime))
                 elif .startedAt != null then
-                    (fromdateiso8601($now) - fromdateiso8601(.startedAt))
+                    (($now | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) - (.startedAt | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime))
                 else
                     0
                 end
@@ -46,9 +46,9 @@ if command -v jq >/dev/null 2>&1; then
                     . + {
                         duration: (
                             if .completed_at != null then
-                                (fromdateiso8601(.completed_at) - fromdateiso8601(.started_at))
+                                ((.completed_at | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) - (.started_at | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime))
                             elif .started_at != null then
-                                (fromdateiso8601($now) - fromdateiso8601(.started_at))
+                                (($now | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) - (.started_at | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime))
                             else
                                 0
                             end
@@ -58,9 +58,9 @@ if command -v jq >/dev/null 2>&1; then
                                 . + {
                                     duration: (
                                         if .completed_at != null then
-                                            (fromdateiso8601(.completed_at) - fromdateiso8601(.started_at))
+                                            ((.completed_at | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) - (.started_at | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime))
                                         elif .started_at != null then
-                                            (fromdateiso8601($now) - fromdateiso8601(.started_at))
+                                            (($now | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) - (.started_at | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime))
                                         else
                                             0
                                         end
