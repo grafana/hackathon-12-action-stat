@@ -25,6 +25,7 @@ otelcol.receiver.filelog "github_actions_logs" {
   include = [string.format("%s/*.log", env("LOGS_DIRECTORY"))]
   start_at = "beginning"
   delete_after_read = true
+  debug_metrics = true,
   
   resource = {
     "service.name" = "github_actions",
@@ -310,4 +311,10 @@ otelcol.exporter.otlphttp "destination" {
 otelcol.auth.basic "destination" {
   username = env("TELEMETRY_USERNAME")
   password = env("TELEMETRY_PASSWORD")
+}
+
+logging {
+  level  = "debug"
+  format = "text"
+  development = true,
 } 
