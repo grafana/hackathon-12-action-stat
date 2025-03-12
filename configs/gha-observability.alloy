@@ -64,11 +64,11 @@ otelcol.receiver.filelog "github_actions_logs" {
     {
       id = "parse-log-line-timestamp",
       type = "time_parser",
-      parse_from = "attributes.timestamp",
+      parse_from = "attributes[\"timestamp\"]",
       layout_type = "strptime",
       layout = "%Y-%m-%dT%H:%M:%S.%fZ",
-      on_error = "drop",
-      parse_to = "attributes",
+      on_error = "send",
+      parse_to = "attributes.parsed_time",
     },
   ]
 
