@@ -321,5 +321,3 @@ otelcol.auth.basic "destination" {
   username = env("TELEMETRY_USERNAME")
   password = env("TELEMETRY_PASSWORD")
 }
-
-otel.exporter.debug "default" {}
