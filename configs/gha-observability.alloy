@@ -44,7 +44,7 @@
 // File log receiver for GitHub Actions workflow logs
 otelcol.receiver.filelog "github_actions_logs" {
   // Use explicit full path with glob pattern for logs
-  include = [string.format("%s/**/*.log", env("LOGS_DIRECTORY"))]
+  include = [string.format("%s/*.log", env("LOGS_DIRECTORY"))]
   exclude = ["**/*.json"] // Exclude JSON files to be safe
   include_file_path = true
   include_file_name = true
@@ -101,7 +101,7 @@ otelcol.receiver.filelog "github_actions_logs" {
 // File log receiver for workflow metrics with enhanced validation
 otelcol.receiver.filelog "github_actions_metrics" {
   // Use explicit full path with glob pattern for metrics
-  include = [string.format("%s/**/*.json", env("METRICS_DIRECTORY"))]
+  include = [string.format("%s/*.json", env("METRICS_DIRECTORY"))]
   exclude = ["**/*.log"] // Exclude log files to be safe
   include_file_path = true
   include_file_name = true
