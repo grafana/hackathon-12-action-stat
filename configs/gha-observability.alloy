@@ -68,7 +68,7 @@ otelcol.receiver.filelog "github_actions_logs" {
       layout_type = "strptime",
       layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       on_error = "send",
-      parse_to = "attributes.parsed_time",
+      parse_to = "attributes[\"parsed_time\"]",
     },
   ]
 
@@ -107,7 +107,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       parse_to = "attributes",
       on_error = "drop",
       timestamp = {
-        parse_from = "attributes.createdAt",
+        parse_from = "attributes[\"createdAt\"]",
         layout_type = "strptime",
         layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       },
@@ -116,7 +116,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "parse-metrics-json-timestamp",
       type = "time_parser",
-      parse_from = "attributes.createdAt",
+      parse_from = "attributes[\"createdAt\"]",
       layout_type = "strptime",
       layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       on_error = "drop",
@@ -126,8 +126,8 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "move-workflow-name",
       type = "move",
-      from = "attributes.workflowName",
-      to = "attributes.workflow.name",
+      from = "attributes[\"workflowName\"]",
+      to = "attributes[\"workflow.name\"]",
       on_error = "drop",
       output = [
         "workflowName",
@@ -137,8 +137,8 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "move-workflow-database-id",
       type = "move",
-      from = "attributes.workflowDatabaseId",
-      to = "attributes.workflow.id",
+      from = "attributes[\"workflowDatabaseId\"]",
+      to = "attributes[\"workflow.id\"]",
       on_error = "drop",
       output = [
         "workflowDatabaseId",
@@ -148,8 +148,8 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "move-database-id",
       type = "move",
-      from = "attributes.databaseId",
-      to = "attributes.run.id",
+      from = "attributes[\"databaseId\"]",
+      to = "attributes[\"run.id\"]",
       on_error = "drop",
       output = [
         "databaseId",
@@ -159,8 +159,8 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "move-status",
       type = "move",
-      from = "attributes.status",
-      to = "attributes.run.status",
+      from = "attributes[\"status\"]",
+      to = "attributes[\"run.status\"]",
       on_error = "drop",
       output = [
         "status",
@@ -168,10 +168,10 @@ otelcol.receiver.filelog "github_actions_metrics" {
       ],
     },
     {
-      id = "move=conclusion",
+      id = "move-conclusion",
       type = "move",
-      from = "attributes.conclusion",
-      to = "attributes.run.conclusion",
+      from = "attributes[\"conclusion\"]",
+      to = "attributes[\"run.conclusion\"]",
       on_error = "drop",
       output = [
         "conclusion",
@@ -181,8 +181,8 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "move-duration",
       type = "move",
-      from = "attributes.duration",
-      to = "attributes.workflow.duration",
+      from = "attributes[\"duration\"]",
+      to = "attributes[\"workflow.duration\"]",
       on_error = "drop",
       output = [
         "duration",
@@ -194,7 +194,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       id = "copy-job-name",
       type = "copy",
       from = "attributes.jobs[\"*\"].name",
-      to = "attributes.workflow.job.name",
+      to = "attributes[\"workflow.job.name\"]",
       on_error = "drop",
       output = [
         "name",
@@ -205,7 +205,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       id = "copy-job-status",
       type = "copy",
       from = "attributes.jobs[\"*\"].status",
-      to = "attributes.workflow.job.status",
+      to = "attributes[\"workflow.job.status\"]",
       on_error = "drop",
       output = [
         "status",
@@ -216,7 +216,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       id = "copy-job-duration",
       type = "copy",
       from = "attributes.jobs[\"*\"].duration",
-      to = "attributes.workflow.job.duration",
+      to = "attributes[\"workflow.job.duration\"]",
       on_error = "drop",
       output = [
         "duration",
@@ -228,7 +228,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       id = "copy-step-name",
       type = "copy",
       from = "attributes.jobs[\"*\"].steps[\"*\"].name",
-      to = "attributes.workflow.step.name",
+      to = "attributes[\"workflow.step.name\"]",
       on_error = "drop",
       output = [
         "name",
@@ -239,7 +239,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       id = "copy-step-status",
       type = "copy",
       from = "attributes.jobs[\"*\"].steps[\"*\"].status",
-      to = "attributes.workflow.step.status",
+      to = "attributes[\"workflow.step.status\"]",
       on_error = "drop",
       output = [
         "status",
@@ -250,7 +250,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       id = "copy-step-duration",
       type = "copy",
       from = "attributes.jobs[\"*\"].steps[\"*\"].duration",
-      to = "attributes.workflow.step.duration",
+      to = "attributes[\"workflow.step.duration\"]",
       on_error = "drop",
       output = [
         "duration",
