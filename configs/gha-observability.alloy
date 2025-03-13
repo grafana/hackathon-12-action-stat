@@ -45,7 +45,7 @@
 local.file_match "gha_files" {
   path_targets = [
     {"__path__" = string.format("%s/*.log", env("LOGS_DIRECTORY"))},
-    {"__path__" = string.format("%s/*.json", env("METRICS_DIRECTORY"))}
+    {"__path__" = string.format("%s/*.json", env("METRICS_DIRECTORY"))},
   ]
 }
 
