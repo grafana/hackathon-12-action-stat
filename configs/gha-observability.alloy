@@ -56,19 +56,15 @@ otelcol.receiver.filelog "github_actions_logs" {
       id = "parse-log-line",
       type = "regex_parser",
       parse_from = "body",
-      regex = "^(?P<job_name>[^\\t]+)\\t(?P<step_name>[^\\t]+)\\t(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+Z) (?P<log_message>.*)$",
+      regex = "^(?P<job_name>[^\\t]*?)\\t(?P<step_name>[^\\t]*?)\\t(?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z)(?:\\s+(?P<log_message>.*))?$",
       on_error = "send",
       parse_to = "attributes",
-    },
-    // Parse timestamp
-    {
-      id = "parse-log-line-timestamp",
-      type = "time_parser",
-      parse_from = "attributes.timestamp",
-      layout_type = "strptime",
-      layout = "%Y-%m-%dT%H:%M:%S.%fZ",
-      on_error = "send",
-      parse_to = "attributes[\"parsed_time\"]",
+      timestamp = {
+        parse_from = "attributes.timestamp",
+        layout_type = "strptime",
+        layout = "%Y-%m-%dT%H:%M:%S.%fZ",
+        on_error = "send",
+      },
     },
   ]
 
