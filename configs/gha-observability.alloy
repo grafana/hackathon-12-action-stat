@@ -17,12 +17,28 @@
 // - workflow.step.status: Step status
 
 /////////////////////////////////////////////////////////////
+// FILE DISCOVERY
+/////////////////////////////////////////////////////////////
+
+// Explicitly define directories to be monitored
+local.file_match "gha_files" {
+  path_targets = [
+    {"__path__" = string.format("%s/*.log", env("LOGS_DIRECTORY"))},
+    {"__path__" = string.format("%s/*.json", env("METRICS_DIRECTORY"))}
+  ]
+}
+
+/////////////////////////////////////////////////////////////
 // RECEIVERS
 /////////////////////////////////////////////////////////////
 
 // File log receiver for GitHub Actions workflow logs
 otelcol.receiver.filelog "github_actions_logs" {
-  include = [string.format("%s/*.log", env("LOGS_DIRECTORY"))]
+  targets = local.file_match.gha_files.targets
+  include_file_path = true
+  include_file_name = true
+  include = ["*/*.log"]  // Only include LOG files
+  exclude = ["*/*.json"] // Explicitly exclude JSON files
   start_at = "beginning"
   delete_after_read = true
   
@@ -75,7 +91,12 @@ otelcol.receiver.filelog "github_actions_logs" {
 
 // File log receiver for workflow metrics with enhanced validation
 otelcol.receiver.filelog "github_actions_metrics" {
-  include = [string.format("%s/*.json", env("METRICS_DIRECTORY"))]
+  // Use same targets as logs but with filtering for JSON files
+  targets = local.file_match.gha_files.targets
+  include_file_path = true
+  include_file_name = true
+  include = ["*/*.json"]  // Only include JSON files
+  exclude = ["*/*.log"]   // Explicitly exclude log files
   start_at = "beginning"
   delete_after_read = true
   
