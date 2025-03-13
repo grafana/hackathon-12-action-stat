@@ -38,28 +38,16 @@
 // - workflow.run_id: ID of the workflow run
 
 /////////////////////////////////////////////////////////////
-// FILE DISCOVERY
-/////////////////////////////////////////////////////////////
-
-// Explicitly define directories to be monitored
-local.file_match "gha_files" {
-  path_targets = [
-    {"__path__" = string.format("%s/*.log", env("LOGS_DIRECTORY"))},
-    {"__path__" = string.format("%s/*.json", env("METRICS_DIRECTORY"))},
-  ]
-}
-
-/////////////////////////////////////////////////////////////
 // RECEIVERS
 /////////////////////////////////////////////////////////////
 
 // File log receiver for GitHub Actions workflow logs
 otelcol.receiver.filelog "github_actions_logs" {
-  targets = local.file_match.gha_files.targets
+  // Use explicit full path with glob pattern for logs
+  include = [string.format("%s/**/*.log", env("LOGS_DIRECTORY"))]
+  exclude = ["**/*.json"] // Exclude JSON files to be safe
   include_file_path = true
   include_file_name = true
-  include = ["*/*.log"]  // Only include LOG files
-  exclude = ["*/*.json"] // Explicitly exclude JSON files
   start_at = "beginning"
   delete_after_read = true
   
@@ -112,12 +100,11 @@ otelcol.receiver.filelog "github_actions_logs" {
 
 // File log receiver for workflow metrics with enhanced validation
 otelcol.receiver.filelog "github_actions_metrics" {
-  // Use same targets as logs but with filtering for JSON files
-  targets = local.file_match.gha_files.targets
+  // Use explicit full path with glob pattern for metrics
+  include = [string.format("%s/**/*.json", env("METRICS_DIRECTORY"))]
+  exclude = ["**/*.log"] // Exclude log files to be safe
   include_file_path = true
   include_file_name = true
-  include = ["*/*.json"]  // Only include JSON files
-  exclude = ["*/*.log"]   // Explicitly exclude log files
   start_at = "beginning"
   delete_after_read = true
   
