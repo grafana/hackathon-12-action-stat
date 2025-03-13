@@ -23,6 +23,16 @@ gh run view "${WORKFLOW_RUN_ID}" \
     --json attempt,conclusion,createdAt,databaseId,displayTitle,event,headBranch,headSha,jobs,name,number,startedAt,status,updatedAt,url,workflowDatabaseId,workflowName \
     > "${METRICS_DIRECTORY}/workflow-${WORKFLOW_RUN_ID}.json"
 
+# Validate the JSON output
+echo "Validating JSON output..."
+if ! jq empty "${METRICS_DIRECTORY}/workflow-${WORKFLOW_RUN_ID}.json" 2>/dev/null; then
+    echo "Error: Invalid JSON received from GitHub CLI"
+    echo "Raw content sample (first 500 chars):"
+    head -c 500 "${METRICS_DIRECTORY}/workflow-${WORKFLOW_RUN_ID}.json"
+    exit 1
+fi
+echo "JSON validation successful."
+
 # Calculate duration and add it to the JSON
 if command -v jq >/dev/null 2>&1; then
     # Use jq to calculate duration if available
