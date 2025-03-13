@@ -116,10 +116,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes[\"workflowName\"]",
       to = "attributes[\"workflow.name\"]",
       on_error = "send",
-      output = [
-        "workflowName",
-        "workflow.name",
-      ],
     },
     {
       id = "move-workflow-database-id",
@@ -127,10 +123,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes[\"workflowDatabaseId\"]",
       to = "attributes[\"workflow.id\"]",
       on_error = "send",
-      output = [
-        "workflowDatabaseId",
-        "workflow.id",
-      ],
     },
     {
       id = "move-database-id",
@@ -138,32 +130,27 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes[\"databaseId\"]",
       to = "attributes[\"run.id\"]",
       on_error = "send",
-      output = [
-        "databaseId",
-        "run.id",
-      ],
+    },
+    {
+      id = "copy-run-id-to-workflow-run-id",
+      type = "copy",
+      from = "attributes[\"run.id\"]",
+      to = "attributes[\"workflow.run_id\"]",
+      on_error = "send",
     },
     {
       id = "move-status",
       type = "move",
       from = "attributes[\"status\"]",
-      to = "attributes[\"run.status\"]",
+      to = "attributes[\"workflow.status\"]",
       on_error = "send",
-      output = [
-        "status",
-        "run.status",
-      ],
     },
     {
       id = "move-conclusion",
       type = "move",
       from = "attributes[\"conclusion\"]",
-      to = "attributes[\"run.conclusion\"]",
+      to = "attributes[\"workflow.conclusion\"]",
       on_error = "send",
-      output = [
-        "conclusion",
-        "run.conclusion",
-      ],
     },
     {
       id = "move-duration",
@@ -171,10 +158,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes[\"duration\"]",
       to = "attributes[\"workflow.duration\"]",
       on_error = "send",
-      output = [
-        "duration",
-        "workflow.duration",
-      ],
     },
     // Job level attributes
     {
@@ -183,10 +166,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.jobs[\"*\"].name",
       to = "attributes[\"workflow.job.name\"]",
       on_error = "send",
-      output = [
-        "name",
-        "workflow.job.name",
-      ],
     },
     {
       id = "copy-job-status",
@@ -194,10 +173,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.jobs[\"*\"].status",
       to = "attributes[\"workflow.job.status\"]",
       on_error = "send",
-      output = [
-        "status",
-        "workflow.job.status",
-      ],
     },
     {
       id = "copy-job-duration",
@@ -205,10 +180,13 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.jobs[\"*\"].duration",
       to = "attributes[\"workflow.job.duration\"]",
       on_error = "send",
-      output = [
-        "duration",
-        "workflow.job.duration",
-      ],
+    },
+    {
+      id = "copy-job-id",
+      type = "copy",
+      from = "attributes.jobs[\"*\"].databaseId",
+      to = "attributes[\"workflow.job.id\"]",
+      on_error = "send",
     },
     // Step level attributes
     {
@@ -217,10 +195,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.jobs[\"*\"].steps[\"*\"].name",
       to = "attributes[\"workflow.step.name\"]",
       on_error = "send",
-      output = [
-        "name",
-        "workflow.step.name",
-      ],
     },
     {
       id = "copy-step-status",
@@ -228,10 +202,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.jobs[\"*\"].steps[\"*\"].status",
       to = "attributes[\"workflow.step.status\"]",
       on_error = "send",
-      output = [
-        "status",
-        "workflow.step.status",
-      ],
     },
     {
       id = "copy-step-duration",
@@ -239,10 +209,13 @@ otelcol.receiver.filelog "github_actions_metrics" {
       from = "attributes.jobs[\"*\"].steps[\"*\"].duration",
       to = "attributes[\"workflow.step.duration\"]",
       on_error = "send",
-      output = [
-        "duration",
-        "workflow.step.duration",
-      ],
+    },
+    {
+      id = "copy-step-id",
+      type = "copy",
+      from = "attributes.jobs[\"*\"].steps[\"*\"].number",
+      to = "attributes[\"workflow.step.id\"]",
+      on_error = "send",
     },
   ]
 
