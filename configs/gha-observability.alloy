@@ -2,19 +2,40 @@
 // METRIC NAMING CONVENTIONS
 /////////////////////////////////////////////////////////////
 // Source: JSON (Authoritative)
+//
+// Duration Metrics (all converted from ns to seconds):
 // - workflow.duration: Total workflow execution time
-//   Calculated as: (updatedAt - createdAt) for completed workflows
-//   or (current_time - startedAt) for running workflows
+//   Source: attributes["duration"] 
+//   Note: Originally calculated as (updatedAt - createdAt) for completed workflows
+//         or (current_time - startedAt) for running workflows
+//
 // - workflow.job.duration: Job execution time
-//   Calculated as: (completed_at - started_at) for completed jobs
-//   or (current_time - started_at) for running jobs
+//   Source: attributes.jobs["*"].duration
+//   Note: Originally calculated as (completed_at - started_at) for completed jobs
+//         or (current_time - started_at) for running jobs
+//
 // - workflow.step.duration: Step execution time
-//   Calculated as: (completed_at - started_at) for completed steps
-//   or (current_time - started_at) for running steps
+//   Source: attributes.jobs["*"].steps["*"].duration
+//   Note: Originally calculated as (completed_at - started_at) for completed steps
+//         or (current_time - started_at) for running steps
+//
+// Status Metrics:
 // - workflow.status: Current workflow status
+//   Source: attributes["status"]
+//
 // - workflow.conclusion: Workflow conclusion
-// - workflow.job.status: Job status
+//   Source: attributes["conclusion"]
+//
+// - workflow.job.status: Job status 
+//   Source: attributes.jobs["*"].status
+//
 // - workflow.step.status: Step status
+//   Source: attributes.jobs["*"].steps["*"].status
+//
+// Retained Attributes:
+// Each metric datapoint retains these attributes:
+// - workflow.name: Name of the workflow
+// - workflow.run_id: ID of the workflow run
 
 /////////////////////////////////////////////////////////////
 // FILE DISCOVERY
