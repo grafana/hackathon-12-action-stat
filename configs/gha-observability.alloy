@@ -64,7 +64,7 @@ otelcol.receiver.filelog "github_actions_logs" {
     {
       id = "parse-log-line-timestamp",
       type = "time_parser",
-      parse_from = "attributes[\"timestamp\"]",
+      parse_from = "attributes.timestamp",
       layout_type = "strptime",
       layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       on_error = "send",
@@ -107,7 +107,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
       parse_to = "attributes",
       on_error = "drop",
       timestamp = {
-        parse_from = "attributes[\"createdAt\"]",
+        parse_from = "attributes.createdAt",
         layout_type = "strptime",
         layout = "%Y-%m-%dT%H:%M:%S.%fZ",
       },
