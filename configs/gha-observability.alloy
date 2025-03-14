@@ -132,20 +132,6 @@ otelcol.receiver.filelog "github_actions_metrics" {
       field = "attributes.debug_file_info",
       value = "Processing file from metrics directory: ${log.file.path}",
     },
-    // Clean the input by removing null bytes before JSON parsing
-    {
-      id = "clean-input",
-      type = "restructure",
-      ops = [
-        {
-          type = "replace",
-          field = "body",
-          old = "\\x00",
-          new = "",
-        },
-      ],
-      on_error = "send",
-    },
     // Parse the entire body as JSON and handle the timestamp
     {
       id = "parse-metrics-json",
