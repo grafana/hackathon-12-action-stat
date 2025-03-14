@@ -166,7 +166,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-json-parsed",
       type = "filter",
-      expr = '!error match "^json_parser"',
+      expr = "!error match \"^json_parser\"",
       output = "check-workflow-name",
     },
     // Workflow level attributes with enhanced validation and field existence checks
@@ -174,7 +174,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-workflow-name",
       type = "filter",
-      expr = 'exists(attributes["workflowName"])',
+      expr = "exists(attributes[\"workflowName\"])",
       output = "move-workflow-name",
     },
     {
@@ -188,7 +188,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-workflow-database-id",
       type = "filter",
-      expr = 'exists(attributes["workflowDatabaseId"])',
+      expr = "exists(attributes[\"workflowDatabaseId\"])",
       output = "move-workflow-database-id",
     },
     {
@@ -202,7 +202,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-database-id",
       type = "filter",
-      expr = 'exists(attributes["databaseId"])',
+      expr = "exists(attributes[\"databaseId\"])",
       output = "move-database-id",
     },
     {
@@ -216,7 +216,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-run-id",
       type = "filter",
-      expr = 'exists(attributes["run.id"])',
+      expr = "exists(attributes[\"run.id\"])",
       output = "copy-run-id-to-workflow-run-id",
     },
     {
@@ -230,7 +230,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-status",
       type = "filter",
-      expr = 'exists(attributes["status"])',
+      expr = "exists(attributes[\"status\"])",
       output = "move-status",
     },
     {
@@ -244,7 +244,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-conclusion",
       type = "filter",
-      expr = 'exists(attributes["conclusion"])',
+      expr = "exists(attributes[\"conclusion\"])",
       output = "move-conclusion",
     },
     {
@@ -258,7 +258,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-duration",
       type = "filter",
-      expr = 'exists(attributes["duration"])',
+      expr = "exists(attributes[\"duration\"])",
       output = "move-duration",
     },
     {
@@ -273,7 +273,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-jobs-exist",
       type = "filter",
-      expr = 'exists(attributes.jobs) && length(attributes.jobs) > 0',
+      expr = "exists(attributes.jobs) && length(attributes.jobs) > 0",
       output = "job-attributes-router",
     },
     // Route to all job-level attribute processors
@@ -322,7 +322,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-steps-exist",
       type = "filter",
-      expr = 'exists(attributes.jobs) && length(attributes.jobs) > 0 && exists(attributes.jobs["*"].steps) && length(attributes.jobs["*"].steps) > 0',
+      expr = "exists(attributes.jobs) && length(attributes.jobs) > 0 && exists(attributes.jobs[\"*\"].steps) && length(attributes.jobs[\"*\"].steps) > 0",
       output = "step-attributes-router",
     },
     // Route to all step-level attribute processors
