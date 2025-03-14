@@ -162,6 +162,14 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes.raw_content",
       on_error = "send",
     },
+    // Only proceed if JSON parsing was successful
+    {
+      id = "check-json-parsed",
+      type = "filter",
+      expr = '!error match "^json_parser"',
+      drop_ratio = 0.0,
+      output = "check-workflow-name",
+    },
     // Workflow level attributes with enhanced validation and field existence checks
     // Only move workflowName if it exists
     {
