@@ -135,13 +135,15 @@ otelcol.receiver.filelog "github_actions_metrics" {
     // Clean the input by removing null bytes before JSON parsing
     {
       id = "clean-input",
-      type = "regex_parser",
-      parse_from = "body",
-      regex = "\\x00",
-      replace = {
-        expression = "\\x00",
-        replacement = "",
-      },
+      type = "restructure",
+      ops = [
+        {
+          "type": "replace",
+          "field": "body",
+          "old": "\\x00",
+          "new": "",
+        },
+      ],
       on_error = "send",
     },
     // Parse the entire body as JSON and handle the timestamp
