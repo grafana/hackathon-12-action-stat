@@ -162,13 +162,29 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes.raw_content",
       on_error = "send",
     },
-    // Workflow level attributes with enhanced validation
+    // Workflow level attributes with enhanced validation and field existence checks
+    // Only move workflowName if it exists
+    {
+      id = "check-workflow-name",
+      type = "filter",
+      expr = 'exists(attributes["workflowName"])',
+      drop_ratio = 0.0,
+      output = "move-workflow-name",
+    },
     {
       id = "move-workflow-name",
       type = "move",
       from = "attributes[\"workflowName\"]",
       to = "attributes[\"workflow.name\"]",
       on_error = "send",
+    },
+    // Only move workflowDatabaseId if it exists
+    {
+      id = "check-workflow-database-id",
+      type = "filter",
+      expr = 'exists(attributes["workflowDatabaseId"])',
+      drop_ratio = 0.0,
+      output = "move-workflow-database-id",
     },
     {
       id = "move-workflow-database-id",
@@ -177,12 +193,28 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes[\"workflow.id\"]",
       on_error = "send",
     },
+    // Only move databaseId if it exists
+    {
+      id = "check-database-id",
+      type = "filter",
+      expr = 'exists(attributes["databaseId"])',
+      drop_ratio = 0.0,
+      output = "move-database-id",
+    },
     {
       id = "move-database-id",
       type = "move",
       from = "attributes[\"databaseId\"]",
       to = "attributes[\"run.id\"]",
       on_error = "send",
+    },
+    // Only copy run.id if it exists
+    {
+      id = "check-run-id",
+      type = "filter",
+      expr = 'exists(attributes["run.id"])',
+      drop_ratio = 0.0,
+      output = "copy-run-id-to-workflow-run-id",
     },
     {
       id = "copy-run-id-to-workflow-run-id",
@@ -191,12 +223,28 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes[\"workflow.run_id\"]",
       on_error = "send",
     },
+    // Only move status if it exists
+    {
+      id = "check-status",
+      type = "filter",
+      expr = 'exists(attributes["status"])',
+      drop_ratio = 0.0,
+      output = "move-status",
+    },
     {
       id = "move-status",
       type = "move",
       from = "attributes[\"status\"]",
       to = "attributes[\"workflow.status\"]",
       on_error = "send",
+    },
+    // Only move conclusion if it exists
+    {
+      id = "check-conclusion",
+      type = "filter",
+      expr = 'exists(attributes["conclusion"])',
+      drop_ratio = 0.0,
+      output = "move-conclusion",
     },
     {
       id = "move-conclusion",
@@ -205,6 +253,14 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes[\"workflow.conclusion\"]",
       on_error = "send",
     },
+    // Only move duration if it exists
+    {
+      id = "check-duration",
+      type = "filter",
+      expr = 'exists(attributes["duration"])',
+      drop_ratio = 0.0,
+      output = "move-duration",
+    },
     {
       id = "move-duration",
       type = "move",
@@ -212,7 +268,28 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes[\"workflow.duration\"]",
       on_error = "send",
     },
-    // Job level attributes
+    // Job level attributes with enhanced validation and field existence checks
+    // Check if jobs array exists and has elements
+    {
+      id = "check-jobs-exist",
+      type = "filter",
+      expr = 'exists(attributes.jobs) && length(attributes.jobs) > 0',
+      drop_ratio = 0.0,
+      output = "job-attributes-router",
+    },
+    // Route to all job-level attribute processors
+    {
+      id = "job-attributes-router",
+      type = "router",
+      routes = [
+        { output = "copy-job-name", expr = "true" },
+        { output = "copy-job-status", expr = "true" },
+        { output = "copy-job-duration", expr = "true" },
+        { output = "copy-job-id", expr = "true" },
+      ],
+      default = "",
+    },
+    // Copy job attributes if they exist
     {
       id = "copy-job-name",
       type = "copy",
@@ -241,7 +318,28 @@ otelcol.receiver.filelog "github_actions_metrics" {
       to = "attributes[\"workflow.job.id\"]",
       on_error = "send",
     },
-    // Step level attributes
+    // Step level attributes with enhanced validation and field existence checks
+    // Check if jobs with steps exist
+    {
+      id = "check-steps-exist",
+      type = "filter",
+      expr = 'exists(attributes.jobs) && length(attributes.jobs) > 0 && exists(attributes.jobs["*"].steps) && length(attributes.jobs["*"].steps) > 0',
+      drop_ratio = 0.0,
+      output = "step-attributes-router",
+    },
+    // Route to all step-level attribute processors
+    {
+      id = "step-attributes-router",
+      type = "router",
+      routes = [
+        { output = "copy-step-name", expr = "true" },
+        { output = "copy-step-status", expr = "true" },
+        { output = "copy-step-duration", expr = "true" },
+        { output = "copy-step-id", expr = "true" },
+      ],
+      default = "",
+    },
+    // Copy step attributes if they exist
     {
       id = "copy-step-name",
       type = "copy",
