@@ -138,10 +138,10 @@ otelcol.receiver.filelog "github_actions_metrics" {
       type = "restructure",
       ops = [
         {
-          "type": "replace",
-          "field": "body",
-          "old": "\\x00",
-          "new": "",
+          type = "replace",
+          field = "body",
+          old = "\\x00",
+          new = "",
         },
       ],
       on_error = "send",
