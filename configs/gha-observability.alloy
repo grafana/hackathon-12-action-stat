@@ -109,7 +109,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
   delete_after_read = true
   
   debug_metrics {
-    disable_high_cardinality_metrics = true
+    disable_high_cardinality_metrics = false  // Enable high cardinality metrics for debugging
     level = "detailed"
   }
 
@@ -120,10 +120,18 @@ otelcol.receiver.filelog "github_actions_metrics" {
     "workflow.run_id" = env("WORKFLOW_RUN_ID"),
     "source" = "github_actions",
     "metric.source" = "json",
-    "validation.enabled" = "true",  // Enable validation tracking
+    "validation.enabled" = "true",
   }
 
+  // Add debug logging operator at the start
   operators = [
+    // Debug operator to log the file details
+    {
+      id = "debug-file-info",
+      type = "add",
+      field = "attributes.debug_file_info",
+      value = "Processing file from metrics directory: ${log.file.path}",
+    },
     // Parse the entire body as JSON and handle the timestamp
     {
       id = "parse-metrics-json",
@@ -137,6 +145,14 @@ otelcol.receiver.filelog "github_actions_metrics" {
         layout = "%Y-%m-%dT%H:%M:%S.%fZ",
         on_error = "send",
       },
+    },
+    // Add raw message logging to capture the unprocessed content
+    {
+      id = "capture-raw-content",
+      type = "copy",
+      from = "body",
+      to = "attributes.raw_content",
+      on_error = "send",
     },
     // Workflow level attributes with enhanced validation
     {
@@ -249,6 +265,8 @@ otelcol.receiver.filelog "github_actions_metrics" {
   ]
 
   output {
+    // Send logs output for debugging
+    logs = [otelcol.exporter.otlphttp.destination.input]
     metrics = [otelcol.exporter.otlphttp.destination.input]
   }
 }
@@ -259,8 +277,8 @@ otelcol.receiver.filelog "github_actions_metrics" {
 
 // Batch processor for better performance
 otelcol.processor.batch "github_actions_batch" {
-  timeout = "1s"
-  send_batch_size = 1024
+  timeout = "1s"  // Maximum time to wait before flushing the batch
+  send_batch_size = 1024  // Maximum batch size before flushing
 
   output {
     logs = [otelcol.processor.transform.github_actions_transform.input]
