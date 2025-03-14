@@ -158,7 +158,7 @@ otelcol.receiver.filelog "github_actions_metrics" {
     {
       id = "check-json-parsed",
       type = "filter",
-      expr = "!error match \"^json_parser\"",
+      expr = "exists(attributes)",
       output = "check-workflow-name",
     },
     // Workflow level attributes with enhanced validation and field existence checks
