@@ -1,4 +1,4 @@
-FROM grafana/alloy:latest
+FROM grafana/alloy:latest@sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308
 
 LABEL org.opencontainers.image.source="https://github.com/grafana/hackathon-12-action-stat" \
 	org.opencontainers.image.description="Multi-arch GitHub Action to upload telemetry data to an OTLP endpoint"
